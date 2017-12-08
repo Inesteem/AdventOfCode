@@ -33,15 +33,6 @@ int get_ring(int num){
 }
 //1,3,5,7,9
 //0,1,2,3,4
-
-int get_max(int num){
-
-    auto ring = get_ring(num);
-    int max;
-
-    max = min = magic = (2*ring+1);
-    return max * max;
-}
 vector<int> get_liners(int num) {
     vector<int> ret;
     if(num <= 1) return ret;
@@ -64,37 +55,42 @@ vector<int> get_liners(int num) {
 }
 
 
-bool is_edge(int idx) {
-    if(!idx) return true;
-    int num = idx + 1;
 
-    auto ring = get_ring(num);
-    int max, magic;
-    max =  magic = (2*ring+1);
-    max *= max;
+int get_ham(int num) {
+    if(num <= 1) return 0;
 
-    for(int i = 0; i < 4; ++i ){
-        if(num == (i + max - i * magic)) return true;
+    auto liners = get_liners(num);
 
-    }
-    return false; 
+    int dist = num;
+
+    for(auto &elem : liners){
+        int tmp = abs(elem-num);
+        if(tmp < dist) dist = tmp;
+
+    }    
+
+    return dist + get_ring(num);
 }
 
 int main(){
-    vector<int> init = {1,1,2,4,5,10,11,23,25};
-
-    vector<int< res(10000);
-    for(int i = 0; i < init.size(); ++i){
-        res[i] = init(i);
-    }
-
-   for(int i = init.size(); i < res.size(); ++i){
-        if(is_edge(i)){
-            auto max = get_max(i+1);
-            res[i] = res[i-1] + 
-        }
+    /*
+    for(int i = 0; i < 9*9;  i+=4) {
+        cout << i << " : " << get_ring(i) << "\t" << i+1 << " : " << get_ring(i+1) << "\t";
+        cout << i+2 << " : " << get_ring(i+2) << "\t" << i+3 << " : " << get_ring(i+3) << endl;
+    }*/
+   /*
+   print( get_liners(5) );
+   print( get_liners(25));
+   print( get_liners(45));
+   print( get_liners(50));
+   */
     
-    } 
+//    for(int i = 0; i < 49; ++i)
+//        if(get_ham(i) == 4) cout << i << " : " << get_ham(i) << endl;
+    cout << get_ham(12) << endl;
+    cout << get_ham(23) << endl;
+    cout << get_ham(1024) << endl;
+    cout << get_ham(347991) << endl;
 
     return 0;
 }
