@@ -33,34 +33,26 @@ int get_ring(int num){
 }
 //1,3,5,7,9
 //0,1,2,3,4
+struct stats{
+ int min, max, magic, ring;   
+ int side;   
+};
 
-int get_max(int num){
 
-    auto ring = get_ring(num);
-    int max;
+stats get_stats(int num){
+    stats s;
+    if(num <= 1) return s;
+    s.ring = get_ring(num);
 
-    max = min = magic = (2*ring+1);
-    return max * max;
-}
-vector<int> get_liners(int num) {
-    vector<int> ret;
-    if(num <= 1) return ret;
+    s.max = s.min = s.magic = (2*s.ring+1);
+    s.min -= 2;
+    s.max *= s.max;
+    s.min *= s.min;
+    ++(s.min);
 
-    auto ring = get_ring(num);
-    int min, max, magic;
 
-    max = min = magic = (2*ring+1);
-    min -= 2;
-    max *= max;
-    min *= min;
-    ++min;
 
-//    cout << num << " -> { " << min << " : " << max << " } " << endl;
-
-    for(int i = 0; i < 4; ++i){
-        ret.push_back( max - (magic * i -i + ring));
-    }
-    return ret;
+    return s;
 }
 
 
@@ -83,18 +75,31 @@ bool is_edge(int idx) {
 int main(){
     vector<int> init = {1,1,2,4,5,10,11,23,25};
 
-    vector<int< res(10000);
+    vector<int> res(10000);
     for(int i = 0; i < init.size(); ++i){
-        res[i] = init(i);
+        res[i] = init[i];
     }
 
    for(int i = init.size(); i < res.size(); ++i){
+        auto s = get_stats(i + 1);
         if(is_edge(i)){
-            auto max = get_max(i+1);
-            res[i] = res[i-1] + 
+            int diag = s.ring * 8;
+            res[i] = res[i-1];
+            if(i+1 == s.max)                        res[i] += res[i - diag - 8]; 
+            else if(i+1 == s.max - s.magic + 1)     res[i] += res[i - diag - 6]; 
+            else if(i+1 == s.max - 2 * s.magic + 2) res[i] += res[i - diag - 4]; 
+            else                                    res[i] += res[i - diag - 2]; 
         }
-    
-    } 
+         else if(is_edge(i-1)){
+            res[i] = 2 * res[i-1] - res[i-2];
+            if(i+1 == s.max)                        res[i] += res[i - diag - 8 + 1]; 
+            else if(i+1 == s.max - s.magic + 1)     res[i] += res[i - diag - 6 + 1]; 
+            else if(i+1 == s.max - 2 * s.magic + 2) res[i] += res[i - diag - 4 + 1]; 
+            else                                    res[i] += res[i - diag - 2 + 1]; 
 
+        }
+
+    } 
+/
     return 0;
 }
