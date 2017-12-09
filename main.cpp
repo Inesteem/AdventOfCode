@@ -77,8 +77,8 @@ int main(){
 			num += vec[vec.size() - dist + 1];
 //			cout << num << " = " << vec[vec.size()-1] << " + " << vec[vec.size()-2] << " + " << vec[vec.size()-dist] << " + " <<vec[vec.size()-dist+1] << endl;
 			vec.push_back(num);
-			int j = 0; if(!i) j = 1; 
-			for(; j < width-4; ++j){
+			int j = 0; if(!i) j = 1; // entry point
+			for(; j < width-4; ++j){//2 edges, 2 near edges
 				num = vec[vec.size()-1];
 				num += vec[vec.size()-dist+1];
 				num += vec[vec.size()-dist];
