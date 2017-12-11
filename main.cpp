@@ -55,7 +55,7 @@ int main(int argc, char *argv[]){
     }
 
     #endif
-    cout << "Instrucions : " << maze << endl;
+    cout << "Instrucions : "; print(maze); cout << endl;
     cout << "It took " << cnt << " steps to fool the system!" << endl; 
 	return 0;
 }
