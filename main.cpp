@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 
-#define STAR8
+#define STAR9
 
 using std::cout;
 using std::endl;
@@ -37,12 +37,25 @@ int main(int argc, char *argv[]){
 
     int cnt = 0;
     
-
+    #ifdef STAR8 
     for(int i = 0; i < maze.size() && i >= 0;--i){
         ++maze[i];
         i += maze[i]; 
         ++cnt;
     }
+    #else
+    for(int i = 0; i < maze.size() && i >= 0;){
+        auto offset = maze[i];
+        if(maze[i] < 3){
+            i += maze[i]++;
+        } else {
+            i += maze[i]--;
+        } 
+        ++cnt;
+    }
+
+    #endif
+    cout << "Instrucions : " << maze << endl;
     cout << "It took " << cnt << " steps to fool the system!" << endl; 
 	return 0;
 }
