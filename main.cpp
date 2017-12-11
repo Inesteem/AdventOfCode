@@ -21,51 +21,28 @@ template<class T> void print(vector<T> vec){
     cout << vec[size-1] << " }" << endl;
 
 }
-
-bool is_anagram(std::string s1, std::string s2){
-  std::sort(s1.begin(), s1.end());
-  std::sort(s2.begin(), s2.end());
-  return s1 == s2;
-}
-
 int main(int argc, char *argv[]){
-	if(argc != 2){
-		cout << "wrong parameter count, submit filename!" << endl;
-		exit(0);
-	}	
-	std::ifstream infile(argv[1], std::ifstream::in);
-	if(infile.fail()){
-		cout << "an error occured" << endl;
-		exit(-1);
-	}
-	std::string line;
-	int valid = 0;	
-	int lines = 0;	
-	while (std::getline(infile, line)) {
-    	std::istringstream iss(line);
-		string pw = "";
-		vector<string> passwords;
-		while(iss >> pw){
-			passwords.push_back(pw);
-		}
-		++valid;	
-#ifdef STAR8
-		for(auto &elem : passwords){
-			 std::sort(elem.begin(), elem.end());
-		}
-#endif
+    vector<int> maze;
+    if(argc != 2){
+        cout << "wrong parameter count, submit filename! Using default vec" << endl;
+        maze = {0,3,0,1,-3};
+    } else  {
 
+        std::ifstream infile(argv[1], std::ifstream::in);
+        int instr;
+         while(infile >> instr){
+             maze.push_back(instr);
+         }
+    } 
 
-		for(auto itr = passwords.begin(); itr != passwords.end();++itr){
+    int cnt = 0;
+    
 
-			if(std::find(itr+1, passwords.end(), *itr) != passwords.end()){
-				--valid;
-				cout << line << " : not valid :(" << endl;
-				break;
-			}
-		}
-		++lines;
-	}	
-	cout << valid << " lines from " << lines << " valid!" << endl;
+    for(int i = 0; i < maze.size() && i >= 0;--i){
+        ++maze[i];
+        i += maze[i]; 
+        ++cnt;
+    }
+    cout << "It took " << cnt << " steps to fool the system!" << endl; 
 	return 0;
 }
