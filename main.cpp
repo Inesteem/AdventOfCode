@@ -22,40 +22,35 @@ template<class T> void print(vector<T> vec){
 
 }
 int main(int argc, char *argv[]){
-    vector<int> maze;
-    if(argc != 2){
-        cout << "wrong parameter count, submit filename! Using default vec" << endl;
-        maze = {0,3,0,1,-3};
-    } else  {
-
-        std::ifstream infile(argv[1], std::ifstream::in);
-        int instr;
-         while(infile >> instr){
-             maze.push_back(instr);
-         }
-    } 
-
+    vector<int> data = {0,2,7,0};
     int cnt = 0;
-    
-    #ifdef STAR8 
-    for(int i = 0; i < maze.size() && i >= 0;--i){
-        ++maze[i];
-        i += maze[i]; 
-        ++cnt;
-    }
-    #else
-    for(int i = 0; i < maze.size() && i >= 0;){
-        auto offset = maze[i];
-        if(maze[i] < 3){
-            i += maze[i]++;
-        } else {
-            i += maze[i]--;
-        } 
-        ++cnt;
-    }
+  
+    int start = 2;
 
-    #endif
-    cout << "Instrucions : "; print(maze); cout << endl;
-    cout << "It took " << cnt << " steps to fool the system!" << endl; 
-	return 0;
+   // int end = (start + data[start]) % num;
+    int to_add = 7 / data.size();
+    cout << "to_add " << to_add << endl;
+    int end = (start + 7) % data.size();
+    data[start] = 0;
+    for(int i = 0; i < data.size(); ++i){
+        
+        if(end > start){
+            if(i <= start){
+                data[i] += to_add - 1;
+            } else { 
+                data[i] += to_add;
+            }
+        } else { 
+            if(i > end && i <= start){
+                data[i] += to_add - 1;
+            } else {
+                data[i] += to_add;
+
+            }
+
+        }
+   }
+
+    print(data);
+   	return 0;
 }
