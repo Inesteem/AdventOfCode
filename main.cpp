@@ -84,12 +84,17 @@ int main(int argc, char *argv[]){
         do_stuff(data);
         cout << already_there(data) << endl;
     }
-
+    int cnt = 0;
+    vector<int> data = {11, 11, 13, 7, 0, 15, 5, 5, 4, 4, 1, 1, 7, 1, 15, 11};
+    while(!already_there(data)){
+        do_stuff(data);
+        ++cnt;
+    }
+    cout << "Es brauchte " << cnt << " Durchgaenge" << endl;
    	return 0;
 }
 
 void do_stuff(vector<int> &data){
-    int cnt = 0;
     cout << "---------------------" << endl;
     print(data);
     int start = max_element(data.begin(),data.end()) - data.begin();
