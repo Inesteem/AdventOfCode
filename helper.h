@@ -10,6 +10,9 @@
 #include <sstream>
 #include <unordered_map>
 #include <cassert>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 using std::cout;
 using std::endl;
@@ -29,6 +32,8 @@ template<class T> void print(vector<T> vec){
     cout << vec[size-1] << " }" << endl;
 
 }
+
+
 
 
 #endif
