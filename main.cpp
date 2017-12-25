@@ -142,84 +142,57 @@ void print_s(vector<int> &vec, int s_pos, int e_pos){
 	cout << " }" << endl;
 }
 
-void test(){
+vector<int> get_sparse_hash(string str){
     Ringbuffer<int> rb;
-#ifdef INPUT
 	for(int i = 0; i < 256; ++i){rb.append(i);}
-	vector<int> coms  = {14,58,0,116,179,16,1,104,2,254,167,86,255,55,122,244};
-#else
-	for(int i = 0; i < 5; ++i){rb.append(i);}
-	vector<int> coms = {3,4,1,5};
-#endif
+
+	vector<int> coms;
+	for(int i = 0; i < str.size(); ++i){
+		coms.push_back((int)str[i]);
+	}
+
+	coms.push_back(17);
+	coms.push_back(31);
+	coms.push_back(73);
+	coms.push_back(47);
+	coms.push_back(23);
 	auto size = rb.size();
 	int skip = 0;
-	
-	for( auto & com : coms ){
-		print(rb.get_vec());
-		assert(com <= size);
-			cout << "reverse " << com << " elems!" << endl;
-		rb.reverse(com);
-		rb.advance(com + skip); 
-		++skip;	
+	for(int i = 0; i < 64; ++i){	
+		for( auto & com : coms ){
+			assert(com <= size);
+				cout << "reverse " << com << " elems!" << endl;
+			rb.reverse(com);
+			rb.advance(com + skip); 
+			++skip;	
+		}
 	}
-	print(rb.get_vec());
-	cout << "mul of first elements : " << rb.get_mul() << endl;
-	exit(0);
+//	cout << "mul of first elements : " << rb.get_mul() << endl;
+	return rb.get_vec();
+}
+vector<int> get_dense_hash(vector<int> &vec){
+	assert(vec.size() == 256);
+	vector<int> ret(16);
+	for(int i = 0; i < 16; ++i){
+			ret[i] = 0;
+		for(int j = 0; j < 16; ++j){
+			ret[i] ^= vec[i * 16 + j];
+		}
+	}
+	return ret;
+}
 
+void print_hash(vector<int> &hash){
+	cout << std::hex << std::setfill('0') << std::setw(2);
+	for(auto & ch : hash){
+		cout << ch;
+	}
+	cout << endl;
 }
 
 int main(int argc, char *argv[]){
-//	test();
-
-#ifdef INPUT
-	vector<int> elems(256);
-	for(int i = 0; i < 256; ++i){elems[i] = i;}
-	vector<int> coms  = {14,58,0,116,179,16,1,104,2,254,167,86,255,55,122,244};
-#else
-	vector<int> elems = {0,1,2,3,4};
-	vector<int> coms = {3,4,1,5};
-#endif
-	auto size = elems.size();
-
-	int s_pos = 0;
-	int pos = 0;
-	int e_pos = 0;
-	int skip = 0;
-
-	for(auto &com : coms){
-		assert(com <= size);
-		s_pos = pos;	
-		e_pos = (pos + com - 1 ) % size;
-		print_s(elems, s_pos, e_pos);
-		cout << "s_pos : " << s_pos <<  " : " << elems[s_pos] << endl; 
-		cout << "e_pos : " << e_pos <<  " : " << elems[e_pos] << endl; 
-		if(e_pos < s_pos){
-			while(e_pos >= 0 && s_pos < size){
-				std::swap(elems[e_pos], elems[s_pos]);
-				--e_pos;
-				++s_pos;
-			}	
-			if(e_pos < 0) e_pos = size-1;
-			else if(s_pos == size) s_pos = 0;
-			cout << "\t"; print(elems);
-			cout << "\t"; 
-		cout << "s_pos : " << s_pos <<  " : " << elems[s_pos] << endl; 
-			cout << "\t"; 
-		cout << "e_pos : " << e_pos <<  " : " << elems[e_pos] << endl; 
-
-		}
-		while(e_pos > s_pos){
-			std::swap(elems[e_pos], elems[s_pos]);
-			--e_pos;
-			++s_pos;
-		}
-		pos += (com + skip);
-		pos %= size;
-		++skip;
-	}	
-
-		print(elems);
-		cout << "mul of first elements : " << elems[0] * elems[1] << endl;
-
+	auto sparse = get_sparse_hash("1,2,4");
+	auto dense = get_dense_hash(sparse);
+	print_hash(dense);
 	return 0;
 }
