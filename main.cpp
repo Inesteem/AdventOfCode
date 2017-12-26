@@ -90,13 +90,13 @@ public:
 		Element<T> *start = pos;
 		Element<T> *end = pos;
 		while(num > 1){
-			cout << end->get_value() << " -> ";
+		//	cout << end->get_value() << " -> ";
 			end = end->get_next();
 			--num;
 		}		
-		cout << end->get_value() << ";" << endl;
+//		cout << end->get_value() << ";" << endl;
 		while(half){
-			cout << start->get_value()<< " <-> " << end->get_value() << endl;
+//			cout << start->get_value()<< " <-> " << end->get_value() << endl;
 			start->swap(end);
 			start = start->get_next();
 			end   = end->get_prev();
@@ -148,9 +148,9 @@ vector<int> get_sparse_hash(string str){
 
 	vector<int> coms;
 	for(int i = 0; i < str.size(); ++i){
-		coms.push_back((int)str[i]);
+		coms.push_back((unsigned char)str[i]);
 	}
-
+	
 	coms.push_back(17);
 	coms.push_back(31);
 	coms.push_back(73);
@@ -161,7 +161,7 @@ vector<int> get_sparse_hash(string str){
 	for(int i = 0; i < 64; ++i){	
 		for( auto & com : coms ){
 			assert(com <= size);
-				cout << "reverse " << com << " elems!" << endl;
+		//		cout << "reverse " << com << " elems!" << endl;
 			rb.reverse(com);
 			rb.advance(com + skip); 
 			++skip;	
@@ -183,16 +183,58 @@ vector<int> get_dense_hash(vector<int> &vec){
 }
 
 void print_hash(vector<int> &hash){
-	cout << std::hex << std::setfill('0') << std::setw(2);
 	for(auto & ch : hash){
-		cout << ch;
+		cout << std::hex << std::setfill('0') << std::setw(2) << ch;
 	}
 	cout << endl;
 }
 
-int main(int argc, char *argv[]){
-	auto sparse = get_sparse_hash("1,2,4");
+void test(){
+
+	auto sparse = get_sparse_hash("");
 	auto dense = get_dense_hash(sparse);
 	print_hash(dense);
+	cout << "a2582a3a0e66e6e86e3812dcb672a272" << endl;
+	cout << "----------------------------------------" << endl;
+
+	sparse = get_sparse_hash("AoC 2017");
+	dense = get_dense_hash(sparse);
+	print_hash(dense);
+	cout << "33efeb34ea91902bb2f59c9920caa6cd" << endl;
+	cout << "----------------------------------------" << endl;
+
+
+	sparse = get_sparse_hash("1,2,3");
+	dense = get_dense_hash(sparse);
+	print_hash(dense);
+	cout << "3efbe78a8d82f29979031a4aa0b16a9d" << endl;
+	cout << "----------------------------------------" << endl;
+
+	sparse = get_sparse_hash("1,2,4");
+	dense = get_dense_hash(sparse);
+	print_hash(dense);
+	cout << "63960835bcdc130f0b66d7ff4f6a5a8e" << endl;
+	cout << "----------------------------------------" << endl;
+}
+
+int main(int argc, char *argv[]){
+	test();
+	vector<unsigned char> vec = {14,58,0,116,179,16,1,104,2,254,167,86,255,55,122,244};
+	auto sparse = get_sparse_hash(string(vec.begin(),vec.end()));
+	auto dense1 = get_dense_hash(sparse);
+
+	sparse = get_sparse_hash("14,58,0,116,179,16,1,104,2,254,167,86,255,55,122,244");
+	auto dense2 = get_dense_hash(sparse);
+
+	cout << "----------------------------------------" << endl;
+//	print_hash(dense1);
+	cout << "----------------------------------------" << endl;
+	print_hash(dense2);
+	cout << "----------------------------------------" << endl;
+
+
+
+
+
 	return 0;
 }
