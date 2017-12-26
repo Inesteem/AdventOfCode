@@ -1,86 +1,39 @@
 #include "helper.h"
-#define INPUT
 
-#define N  0
-#define S  1
-#define NE 2
-#define NW 3
-#define SE 4
-#define SW 5
 
-const char *DIR[] = {" N", " S", "NE", "NW", "SE", "SW"};
+class Programm {
+public:
+	int id;
+	int groupid;
+	vector<Programm*> connections;
+	bool visited;
 
-/*
-inline size_t oppos_idx(string &dir){
-	if(!dir.compare("ne")) return SW;
-	if(!dir.compare("sw")) return NE;
+	Programm():id(0),groupid(-1), visited(false){}
 
-	if(!dir.compare("se")) return NW;
-	if(!dir.compare("nw")) return SE;
-	
-	if(!dir.compare("n")) return S;
-	if(!dir.compare("s")) return N;
-
-	cout << "unknown direction!" << endl;
-	exit(-1);	
-}
-*/
-void remove_opposed_dirs(vector<int> &num_dir){
-	int diff = std::abs(num_dir[N] - num_dir[S]);
-		cout << "N-S: " << num_dir[N] << " - " << num_dir[S] << endl;
-	if(num_dir[N] > num_dir[S]){
-		num_dir[N] = diff;
-		num_dir[S] = 0;
-		
-	} else {
-		num_dir[S] = diff;
-		num_dir[N] = 0;
+	void add_con(Programm *p){
+		connections.push_back(p);	
 	}
-		cout << "NW-SE: " << num_dir[NW] << " - " << num_dir[SE] << endl;
 
-	diff = std::abs(num_dir[NW] - num_dir[SE]);
-	if(num_dir[NW] > num_dir[SE]){
-		num_dir[NW] = diff;
-		num_dir[SE] = 0;
-	} else {
-		num_dir[SE] = diff;
-		num_dir[NW] = 0;
-	}
-		cout << "SW-NE: " << num_dir[SW] << " - " << num_dir[NE] << endl;
-	diff = std::abs(num_dir[SW] - num_dir[NE]);
-	if(num_dir[SW] > num_dir[NE]){
-		num_dir[SW] = diff;
-		num_dir[NE] = 0;
-	} else {
-		num_dir[NE] = diff;
-		num_dir[SW] = 0;
+};
+
+unordered_map<int,Programm> progs;
+
+bool wide_first_search(Programm *first_elem, int id){
+	queue<Programm*> to_visit;
+	to_visit.push(first_elem);
+	Programm *now;
+	while(to_visit.size()){
+	 	now = to_visit.front();
+	 	to_visit.pop();
+		if(now->visited) continue;
+		if(now->id == id) return true;
+		now->visited = true;
+		for(auto &p : now->connections){
+			to_visit.push(p);
 		}
-
+	}
+	return false;
 }
-
-
-inline void rb_helper(vector<int> &num_dir, int dir1, int dir2, int new_dir){
-	auto min = std::min(num_dir[dir1],num_dir[dir2]);
-	if(min) cout << DIR[dir1] << ": " << num_dir[dir1] << " | " <<
-					DIR[dir2] << ": " << num_dir[dir2] << " | " <<
-					DIR[new_dir] << ": " << num_dir[new_dir] << " => "<< endl;
-	num_dir[new_dir] += min;
-	num_dir[dir1] -= min;
-	num_dir[dir2] -= min;
-	if(min) cout << DIR[dir1] << ": " << num_dir[dir1] << " | " <<
-					DIR[dir2] << ": " << num_dir[dir2] << " | " <<
-					DIR[new_dir] << ": " << num_dir[new_dir] << endl;
-
-}
-void replace_bends(vector<int> &num_dir){
-	rb_helper(num_dir, N, SW, NW);
-	rb_helper(num_dir, N, SE, NE);
-	rb_helper(num_dir, S, NW, SW);
-	rb_helper(num_dir, S, NE, SE);
-	rb_helper(num_dir, NW, NE, N);
-	rb_helper(num_dir, SW, SE, S);
-}
-
 
 int main(int argc, char *argv[]){
 
@@ -89,30 +42,44 @@ int main(int argc, char *argv[]){
         cout << "wrong parameter count, submit filename!" << endl;
         exit(0);
     }
-
-	auto line = get_one_line(",\n", argv[1], true);
+	string p_delim = "<->";
+	auto lines = get_one_line("\n", argv[1], true);
 	
-	int max = 0;
-	
-	vector <int> num_dir = {0,0,0,0,0,0};
-	for(auto &str : line){
+	for(auto &str : lines){
+		vector<int> prog_con;
+		auto pos = str.find(p_delim);
+		assert(pos != std::string::npos); 
+		prog_con.push_back(stoi(str.substr(0, pos)));
+		str.erase(0, pos + p_delim.length());
 
-		if(!str.compare("n")) ++num_dir[N];
-		else if(!str.compare("s")) ++num_dir[S];
-		else if(!str.compare("nw")) ++num_dir[NW];
-		else if(!str.compare("sw")) ++num_dir[SW];
-		else if(!str.compare("ne")) ++num_dir[NE];
-		else if(!str.compare("se")) ++num_dir[SE];
-		else { cout << "ERROR while parsing" << endl; exit(-1); }
-
-		remove_opposed_dirs(num_dir);
-		replace_bends(num_dir);
-		int steps = std::accumulate(num_dir.begin(), num_dir.end(),0);
-		cout << "steps needed : " << steps << endl;
-		max = std::max(max, steps);
+		while ((pos = str.find(",")) != std::string::npos) {
+			prog_con.push_back(stoi(str.substr(0, pos)));
+			str.erase(0, pos + 1);
+		}	
+		prog_con.push_back(stoi(str));
+		assert(prog_con.size() > 1);
+		for(int i = 1; i < prog_con.size(); ++i){
+			progs[prog_con[0]].add_con(&progs[prog_con[i]]);
+			progs[prog_con[i]].add_con(&progs[prog_con[0]]);
+		}
+		print(prog_con);
 	}
-		cout << "max steps needed : " << max << endl;
-	
+ 	for(auto &p : progs){
+		p.second.id = p.first;
+	} 	
+
+	//search for progID 0
+	int group = 0;
+	for(auto &p : progs){
+		group += wide_first_search(&p.second, 0);
+//		if(!wide_first_search(&p.second, 0)){
+//			cout << "prog " << p.first << " has no connection to 0!" << endl;
+//		}
+		for(auto &p2 : progs){
+			p2.second.visited = false;
+		}
+	}
+	cout << "group size : " << group << endl;
 
 	return 0;
 }

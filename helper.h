@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <queue>
 #include <list>
 #include <vector>
 #include <array>
@@ -22,6 +23,7 @@ using std::endl;
 using std::string;
 using std::vector;
 using std::array;
+using std::queue;
 using std::list;
 using std::pair;
 using std::make_pair;
