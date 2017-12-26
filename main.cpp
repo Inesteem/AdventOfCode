@@ -1,240 +1,112 @@
 #include "helper.h"
 #define INPUT
 
-template <class T>
-class Element{
-	Element *next;
-	Element *prev;
-	T value;
-public:
+#define N  0
+#define S  1
+#define NE 2
+#define NW 3
+#define SE 4
+#define SW 5
 
-	Element(T value, Element *next = nullptr, Element *prev = nullptr): next(next), prev(prev), value(value){}
+const char *DIR[] = {" N", " S", "NE", "NW", "SE", "SW"};
 
-	Element *get_next(){return next;}
-	Element *get_prev(){return prev;}
-	T get_value(){return value;}
+/*
+inline size_t oppos_idx(string &dir){
+	if(!dir.compare("ne")) return SW;
+	if(!dir.compare("sw")) return NE;
 
-	void set_next(Element *next){
-		this->next = next;
-	//	next->prev = this;
-	}
-	void set_prev(Element *prev){
-		this->prev = prev;
-	//	prev->next = this;
-	}
-	void swap(Element *other){
-		//std::swap(id, other->id);
-		std::swap(value, other->value);
+	if(!dir.compare("se")) return NW;
+	if(!dir.compare("nw")) return SE;
+	
+	if(!dir.compare("n")) return S;
+	if(!dir.compare("s")) return N;
+
+	cout << "unknown direction!" << endl;
+	exit(-1);	
+}
+*/
+void remove_opposed_dirs(vector<int> &num_dir){
+	int diff = std::abs(num_dir[N] - num_dir[S]);
+		cout << "N-S: " << num_dir[N] << " - " << num_dir[S] << endl;
+	if(num_dir[N] > num_dir[S]){
+		num_dir[N] = diff;
+		num_dir[S] = 0;
 		
+	} else {
+		num_dir[S] = diff;
+		num_dir[N] = 0;
 	}
-};
+		cout << "NW-SE: " << num_dir[NW] << " - " << num_dir[SE] << endl;
 
-
-template <class T>
-class Ringbuffer{
-	size_t num_elems;
-	Element<T> *last;
-	Element<T> *first;
-	Element<T> *pos;
-	
-public:
-
-	Ringbuffer(): num_elems(0), last(nullptr), first(nullptr), pos(nullptr){
-		
+	diff = std::abs(num_dir[NW] - num_dir[SE]);
+	if(num_dir[NW] > num_dir[SE]){
+		num_dir[NW] = diff;
+		num_dir[SE] = 0;
+	} else {
+		num_dir[SE] = diff;
+		num_dir[NW] = 0;
 	}
-	~Ringbuffer(){
-
-		if(!num_elems){ return; }
-
-		if(num_elems == 1){
-			delete first;
-			return;		
-		}
-
-		Element<T> *tmp = first;	
-		do {
-			tmp = first->get_next();
-			delete first;
-			first = tmp;
-		} while(first != last);
-	}
-	void reset_pos(){
-		pos = first;
+		cout << "SW-NE: " << num_dir[SW] << " - " << num_dir[NE] << endl;
+	diff = std::abs(num_dir[SW] - num_dir[NE]);
+	if(num_dir[SW] > num_dir[NE]){
+		num_dir[SW] = diff;
+		num_dir[NE] = 0;
+	} else {
+		num_dir[NE] = diff;
+		num_dir[SW] = 0;
 	}
 
-	void append(T value){
-		if(!num_elems){
-			first = new Element<T>(value);
-			first->set_next(first);
-			last = first;
-			pos = first;
-		} else {
-			Element<T> *new_elem = new Element<T>(value, first, last);
-			first->set_prev(new_elem);
-			last->set_next(new_elem);
-			last = new_elem;
-		}
-		++num_elems;
-	}
-
-	void advance(size_t num){
-		while(num){
-			pos = pos->get_next();
-			--num;
-		}
-	}  
-
-	void reverse(size_t num){
-		if(num <= 1) return;
-		size_t half = num/2;
-		Element<T> *start = pos;
-		Element<T> *end = pos;
-		while(num > 1){
-		//	cout << end->get_value() << " -> ";
-			end = end->get_next();
-			--num;
-		}		
-//		cout << end->get_value() << ";" << endl;
-		while(half){
-//			cout << start->get_value()<< " <-> " << end->get_value() << endl;
-			start->swap(end);
-			start = start->get_next();
-			end   = end->get_prev();
-			--half;
-		}
-	} 
-	
-	size_t size(){
-		return num_elems;
-	}
-
-	vector<T> get_vec(){
-		vector<T> values(num_elems);
-		Element<T> *tmp = first;
-		for(int i = 0; i < num_elems; ++i){
-			values[i] = tmp->get_value();
-			tmp = tmp->get_next();
-		}
-		return values;
-	}
-	T get_mul(){
-		return first->get_value() * first->get_next()->get_value();
-	}
-
-};
-
-
-
-
-void print_s(vector<int> &vec, int s_pos, int e_pos){
- 	auto size = vec.size();
-    cout << "{ ";
-    for(int i = 0; i < size-1; ++i){
-		if(i == s_pos) cout << "(";
-        cout << vec[i];
-		if(i == e_pos) cout << ")";
-		cout << " , ";
-	}
-	
-	if(size-1 == s_pos) cout << "(";
-    cout << vec[size-1];
-	if(size-1 == e_pos) cout << ")";
-	cout << " }" << endl;
 }
 
-vector<int> get_sparse_hash(string str){
-    Ringbuffer<int> rb;
-	for(int i = 0; i < 256; ++i){rb.append(i);}
 
-	vector<int> coms;
-	for(int i = 0; i < str.size(); ++i){
-		coms.push_back((unsigned char)str[i]);
-	}
-	
-	coms.push_back(17);
-	coms.push_back(31);
-	coms.push_back(73);
-	coms.push_back(47);
-	coms.push_back(23);
-	auto size = rb.size();
-	int skip = 0;
-	for(int i = 0; i < 64; ++i){	
-		for( auto & com : coms ){
-			assert(com <= size);
-		//		cout << "reverse " << com << " elems!" << endl;
-			rb.reverse(com);
-			rb.advance(com + skip); 
-			++skip;	
-		}
-	}
-//	cout << "mul of first elements : " << rb.get_mul() << endl;
-	return rb.get_vec();
+inline void rb_helper(vector<int> &num_dir, int dir1, int dir2, int new_dir){
+	auto min = std::min(num_dir[dir1],num_dir[dir2]);
+	if(min) cout << DIR[dir1] << ": " << num_dir[dir1] << " | " <<
+					DIR[dir2] << ": " << num_dir[dir2] << " | " <<
+					DIR[new_dir] << ": " << num_dir[new_dir] << " => "<< endl;
+	num_dir[new_dir] += min;
+	num_dir[dir1] -= min;
+	num_dir[dir2] -= min;
+	if(min) cout << DIR[dir1] << ": " << num_dir[dir1] << " | " <<
+					DIR[dir2] << ": " << num_dir[dir2] << " | " <<
+					DIR[new_dir] << ": " << num_dir[new_dir] << endl;
+
 }
-vector<int> get_dense_hash(vector<int> &vec){
-	assert(vec.size() == 256);
-	vector<int> ret(16);
-	for(int i = 0; i < 16; ++i){
-			ret[i] = 0;
-		for(int j = 0; j < 16; ++j){
-			ret[i] ^= vec[i * 16 + j];
-		}
-	}
-	return ret;
+void replace_bends(vector<int> &num_dir){
+	rb_helper(num_dir, N, SW, NW);
+	rb_helper(num_dir, N, SE, NE);
+	rb_helper(num_dir, S, NW, SW);
+	rb_helper(num_dir, S, NE, SE);
+	rb_helper(num_dir, NW, NE, N);
+	rb_helper(num_dir, SW, SE, S);
 }
 
-void print_hash(vector<int> &hash){
-	for(auto & ch : hash){
-		cout << std::hex << std::setfill('0') << std::setw(2) << ch;
-	}
-	cout << endl;
-}
-
-void test(){
-
-	auto sparse = get_sparse_hash("");
-	auto dense = get_dense_hash(sparse);
-	print_hash(dense);
-	cout << "a2582a3a0e66e6e86e3812dcb672a272" << endl;
-	cout << "----------------------------------------" << endl;
-
-	sparse = get_sparse_hash("AoC 2017");
-	dense = get_dense_hash(sparse);
-	print_hash(dense);
-	cout << "33efeb34ea91902bb2f59c9920caa6cd" << endl;
-	cout << "----------------------------------------" << endl;
-
-
-	sparse = get_sparse_hash("1,2,3");
-	dense = get_dense_hash(sparse);
-	print_hash(dense);
-	cout << "3efbe78a8d82f29979031a4aa0b16a9d" << endl;
-	cout << "----------------------------------------" << endl;
-
-	sparse = get_sparse_hash("1,2,4");
-	dense = get_dense_hash(sparse);
-	print_hash(dense);
-	cout << "63960835bcdc130f0b66d7ff4f6a5a8e" << endl;
-	cout << "----------------------------------------" << endl;
-}
 
 int main(int argc, char *argv[]){
-	test();
-	vector<unsigned char> vec = {14,58,0,116,179,16,1,104,2,254,167,86,255,55,122,244};
-	auto sparse = get_sparse_hash(string(vec.begin(),vec.end()));
-	auto dense1 = get_dense_hash(sparse);
-
-	sparse = get_sparse_hash("14,58,0,116,179,16,1,104,2,254,167,86,255,55,122,244");
-	auto dense2 = get_dense_hash(sparse);
-
-	cout << "----------------------------------------" << endl;
-//	print_hash(dense1);
-	cout << "----------------------------------------" << endl;
-	print_hash(dense2);
-	cout << "----------------------------------------" << endl;
 
 
+	if(argc != 2){
+        cout << "wrong parameter count, submit filename!" << endl;
+        exit(0);
+    }
 
+	auto line = get_one_line(",\n", argv[1], true);
+	
 
-
+	vector <int> num_dir = {0,0,0,0,0,0};
+	
+	for(auto &str : line){
+		if(!str.compare("n")) ++num_dir[N];
+		else if(!str.compare("s")) ++num_dir[S];
+		else if(!str.compare("nw")) ++num_dir[NW];
+		else if(!str.compare("sw")) ++num_dir[SW];
+		else if(!str.compare("ne")) ++num_dir[NE];
+		else if(!str.compare("se")) ++num_dir[SE];
+		else { cout << "ERROR while parsing" << endl; exit(-1); }
+	}
+	remove_opposed_dirs(num_dir);
+	replace_bends(num_dir);
+	size_t steps = std::accumulate(num_dir.begin(), num_dir.end(),0);
+	cout << "steps needed : " << steps << endl;
 	return 0;
 }

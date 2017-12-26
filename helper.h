@@ -40,6 +40,29 @@ void print(const Container<Value, Allocator> & vec){
 }
 
 
+vector<string> get_one_line(string delim, string filename, bool skip_spaces){
+    std::ifstream infile(filename, std::ifstream::in);
+    if(infile.fail()){
+        cout << "an error occured" << endl;
+        exit(-1);
+    }
+	vector<string> ret;
 
+    if(skip_spaces) infile >> std::noskipws;
+    char ch;
+	string str = "";
+    while (infile >> ch) {
+		if(delim.find(ch) != std::string::npos){
+			ret.push_back(str);
+			str = "";
+			continue;
+		}
+		str += ch;
+	}
+	if(str.size()) ret.push_back(str);
+
+	return ret;
+
+}
 
 #endif
