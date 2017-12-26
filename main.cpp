@@ -54,7 +54,7 @@ void remove_opposed_dirs(vector<int> &num_dir){
 	} else {
 		num_dir[NE] = diff;
 		num_dir[SW] = 0;
-	}
+		}
 
 }
 
@@ -92,10 +92,11 @@ int main(int argc, char *argv[]){
 
 	auto line = get_one_line(",\n", argv[1], true);
 	
-
-	vector <int> num_dir = {0,0,0,0,0,0};
+	int max = 0;
 	
+	vector <int> num_dir = {0,0,0,0,0,0};
 	for(auto &str : line){
+
 		if(!str.compare("n")) ++num_dir[N];
 		else if(!str.compare("s")) ++num_dir[S];
 		else if(!str.compare("nw")) ++num_dir[NW];
@@ -103,10 +104,15 @@ int main(int argc, char *argv[]){
 		else if(!str.compare("ne")) ++num_dir[NE];
 		else if(!str.compare("se")) ++num_dir[SE];
 		else { cout << "ERROR while parsing" << endl; exit(-1); }
+
+		remove_opposed_dirs(num_dir);
+		replace_bends(num_dir);
+		int steps = std::accumulate(num_dir.begin(), num_dir.end(),0);
+		cout << "steps needed : " << steps << endl;
+		max = std::max(max, steps);
 	}
-	remove_opposed_dirs(num_dir);
-	replace_bends(num_dir);
-	size_t steps = std::accumulate(num_dir.begin(), num_dir.end(),0);
-	cout << "steps needed : " << steps << endl;
+		cout << "max steps needed : " << max << endl;
+	
+
 	return 0;
 }
