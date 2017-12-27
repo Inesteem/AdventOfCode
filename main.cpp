@@ -1,39 +1,48 @@
 #include "helper.h"
 
+inline int calc_pos(int depth, int picco){
+	if(!picco || depth == 1) return 0;
 
-class Programm {
-public:
-	int id;
-	int groupid;
-	vector<Programm*> connections;
-	bool visited;
+	int mod = 2*(depth-1);
+	int num = picco%mod;
+	if(num <= mod/2) return num;
 
-	Programm():id(0),groupid(-1), visited(false){}
+	if(depth & 0x10)//even
+		return mod-num-1;
 
-	void add_con(Programm *p){
-		connections.push_back(p);	
+	return mod-num;
+}
+
+
+void print_levels(vector<int> &levels, int picco){
+ 	cout << picco << ": " << endl;	
+	int max = *std::max_element(levels.begin(), levels.end());
+	for(int i = 0; i < levels.size(); ++i){
+		cout << " " << i << "  ";
 	}
-	bool has_group(){return groupid >= 0;}
-	void set_group(int gid){groupid = gid;}
-};
+	cout << endl;
 
-unordered_map<int,Programm> progs;
-
-bool wide_first_search(Programm *first_elem, int id){
-	queue<Programm*> to_visit;
-	to_visit.push(first_elem);
-	Programm *now;
-	while(to_visit.size()){
-	 	now = to_visit.front();
-	 	to_visit.pop();
-		if(now->visited) continue;
-		if(now->id == id) return true;
-		now->visited = true;
-		for(auto &p : now->connections){
-			to_visit.push(p);
+	for(int i = 0; i < max; ++i){
+		for(int level = 0; level < levels.size(); ++level){
+			auto depth = levels[level];
+			bool scanner = calc_pos(depth, picco)  == i; 
+			if(depth > i){
+				if(scanner){ 
+					if(level == picco) cout << "(S) ";
+					else cout << "[S] ";
+				} else{
+					if(!i && level == picco) cout << "( ) ";
+					else cout << "[ ] ";
+				} 
+			}	
+			else if(!i){
+				 if(level == picco) cout << "(.) ";
+				 else cout << "... ";
+			}
+			else cout << "    ";
 		}
+		cout << endl;
 	}
-	return false;
 }
 
 int main(int argc, char *argv[]){
@@ -43,51 +52,33 @@ int main(int argc, char *argv[]){
         cout << "wrong parameter count, submit filename!" << endl;
         exit(0);
     }
-	string p_delim = "<->";
 	auto lines = get_one_line("\n", argv[1], true);
-	
+	vector<int> levels;	
 	for(auto &str : lines){
-		vector<int> prog_con;
-		auto pos = str.find(p_delim);
+		auto pos = str.find(":");
 		assert(pos != std::string::npos); 
-		prog_con.push_back(stoi(str.substr(0, pos)));
-		str.erase(0, pos + p_delim.length());
+		int level = stoi(str.substr(0, pos));
+		int depth = stoi(str.substr(pos + 1, str.size()-1 ));
 
-		while ((pos = str.find(",")) != std::string::npos) {
-			prog_con.push_back(stoi(str.substr(0, pos)));
-			str.erase(0, pos + 1);
-		}	
-		prog_con.push_back(stoi(str));
-		assert(prog_con.size() > 1);
-		for(int i = 1; i < prog_con.size(); ++i){
-			progs[prog_con[0]].add_con(&progs[prog_con[i]]);
-			progs[prog_con[i]].add_con(&progs[prog_con[0]]);
+		int fill = level - levels.size();
+		assert(fill >= 0);
+		if(fill){
+			levels.insert(levels.end(), fill+1, 0);
+			levels[levels.size()-1] = depth;
+		} else {
+			levels.push_back(depth);
 		}
-		print(prog_con);
 	}
- 	for(auto &p : progs){
-		p.second.id = p.first;
-	} 	
-
-	//search for progID 0
-	int groupid = 0;
-	for(auto &p_id : progs){
-		
-		if(p_id.second.has_group()) continue;
-		auto id = p_id.second.id;
-
-		for(auto &p : progs){
-			if(p.second.has_group()) continue;
-			if(wide_first_search(&p.second, id)){
-				p.second.set_group(groupid);
-			}
-			for(auto &p2 : progs){
-				p2.second.visited = false;
-			}
+	int piccos = 0;
+	int score_of_doom = 0;
+	for(int i = 0; i < levels.size(); ++i){
+		//print_levels(levels, i);
+		auto depth = levels[i];
+		bool scanner = !calc_pos(depth, i);
+		if(depth && scanner){
+			score_of_doom += depth * i;
 		}
-		++groupid;	
 	}
-	cout << "group num : " << groupid << endl;
-
+	cout << score_of_doom << endl;
 	return 0;
 }
