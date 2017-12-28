@@ -218,19 +218,16 @@ void test(){
 }
 
 int main(int argc, char *argv[]){
-	test();
-	vector<unsigned char> vec = {14,58,0,116,179,16,1,104,2,254,167,86,255,55,122,244};
-	auto sparse = get_sparse_hash(string(vec.begin(),vec.end()));
-	auto dense1 = get_dense_hash(sparse);
+    if(argc != 2){
+        cout << "wrong parameter count, submit string to hash!" << endl;
+        exit(0);
+    }
 
-	sparse = get_sparse_hash("14,58,0,116,179,16,1,104,2,254,167,86,255,55,122,244");
-	auto dense2 = get_dense_hash(sparse);
+	//sparse = get_sparse_hash("14,58,0,116,179,16,1,104,2,254,167,86,255,55,122,244");
+	auto sparse = get_sparse_hash(string(argv[1]));
+	auto dense = get_dense_hash(sparse);
 
-	cout << "----------------------------------------" << endl;
-//	print_hash(dense1);
-	cout << "----------------------------------------" << endl;
-	print_hash(dense2);
-	cout << "----------------------------------------" << endl;
+	print_hash(dense);
 
 
 

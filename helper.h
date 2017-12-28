@@ -17,6 +17,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <iomanip> // setfill, setw
+#include <bitset>
+#include <cstdint>
+
+#define die(e) do { fprintf(stderr, "%s\n", e); exit(EXIT_FAILURE); } while (0);
+
 
 using std::cout;
 using std::endl;
@@ -65,6 +70,52 @@ vector<string> get_one_line(string delim, string filename, bool skip_spaces){
 
 	return ret;
 
+}
+
+
+string get_output(const char *exe_path, const char *exe, const char *argv){
+
+
+	int link[2];
+	pid_t pid;
+	char output[4096];
+
+	if (pipe(link)==-1)
+	  die("pipe");
+
+	if ((pid = fork()) == -1)
+	  die("fork");
+
+	if(pid == 0) {
+
+	  dup2 (link[1], STDOUT_FILENO);
+	  close(link[0]);
+	  close(link[1]);
+	  execl(exe_path, exe, argv, (char *)0);
+	  die("execl");
+
+	} else {
+
+	  close(link[1]);
+	  int nbytes = read(link[0], output, sizeof(output));
+	  //printf("Output: (%.*s)\n", nbytes, foo);
+	  //wait(NULL);
+	  return string(output, nbytes);
+	}
+
+	return "";
+}
+
+void print_binary(uint32_t i){
+	std::bitset<32> x(i);
+	cout << x << endl;
+}
+
+int numberOfSetBits(uint32_t i){
+     // Java: use >>> instead of >>
+     i = i - ((i >> 1) & 0x55555555);
+     i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
+     return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
 }
 
 #endif
