@@ -96,6 +96,8 @@ public:
     }  
     //day16
     void spin(size_t num){
+        if(!num_elems) return;
+        num = num % num_elems;
         while(num){
             last = last->get_prev();
             first = first->get_prev();
