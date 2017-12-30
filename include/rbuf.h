@@ -34,6 +34,13 @@ public:
             
     }
 
+    bool operator==(Element &elem){
+        return elem.value == value;
+    } 
+    bool operator!=(Element &elem){
+        return elem.value != value;
+    } 
+
     template<class T2> 
     friend ostream & operator <<(ostream &op,Element<T2> &); 
 };
@@ -181,6 +188,18 @@ public:
         T get_mul(){
                 return first->get_value() * first->get_next()->get_value();
         }
+    bool operator ==(Ringbuffer &rb){
+        if(num_elems != rb.num_elems) return false;
+        auto elem1 = first;
+        auto elem2 = rb.first;
+        for(int i = 0; i < num_elems; ++i){
+            if((*elem1) != (*elem2)) return false;
+            elem1 = elem1->get_next();
+            elem2 = elem2->get_next();
+        }
+        return true;
+    }
+
     template<class T2> 
     friend ostream & operator <<(ostream &op,Ringbuffer<T2> &); 
 };
