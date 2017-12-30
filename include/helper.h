@@ -24,6 +24,8 @@
 
 
 using std::cout;
+using std::cerr;
+using std::clog;
 using std::endl;
 using std::string;
 using std::vector;
@@ -51,7 +53,7 @@ void print(const Container<Value, Allocator> & vec){
 vector<string> get_one_line(string delim, string filename, bool skip_spaces){
     std::ifstream infile(filename, std::ifstream::in);
     if(infile.fail()){
-        cout << "an error occured" << endl;
+        cout << "an error occured; file " << filename << " could not be opened!" << endl;
         exit(-1);
     }
 	vector<string> ret;
