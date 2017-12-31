@@ -40,7 +40,11 @@ public:
     bool operator!=(Element &elem){
         return elem.value != value;
     } 
-
+    static void connect(Element *a, Element *b){
+        if(!a || !b) return;
+        a->set_next(b);
+        b->set_prev(a);
+    }
     template<class T2> 
     friend ostream & operator <<(ostream &op,Element<T2> &); 
 };
@@ -60,6 +64,16 @@ public:
     Ringbuffer(): num_elems(0), last(nullptr), first(nullptr), pos(nullptr){
             
     }
+    Ringbuffer(std::initializer_list<T> list): num_elems(0), last(nullptr), first(nullptr), pos(nullptr){
+        if(list.size()){
+            for(auto &value : list){
+               append(value); 
+            }
+        }
+    
+    }
+
+
     ~Ringbuffer(){
 
             if(!num_elems){ return; }
@@ -94,8 +108,9 @@ public:
             }
             ++num_elems;
     }
-
+    
     void advance(size_t num){
+        if(!pos) return;
         while(num){
             pos = pos->get_next();
             --num;
@@ -150,44 +165,67 @@ public:
         elem1->swap(elem2);
         return true;
     }
+    //day17
+    void insert(T value){
+        if(first == last || pos == last){
+            append(value);
+            return;
+        }
+        auto new_elem = new Element<T>(value);
+        Element<T>::connect(new_elem, pos->get_next()); 
+        Element<T>::connect(pos, new_elem); 
+        ++num_elems;    
+    }
+    //day17
+    Element<T> *get_elem(T value){
+        auto elem = first;
+        int num = num_elems + 2;
+        while(num-- && elem->get_value() != value){
+            elem = elem->get_next();
+        }
+        if(num < 0){
+            return nullptr; 
+        }
+        return elem;
+    }
 
 
-        void reverse(size_t num){
-                if(num <= 1) return;
-                size_t half = num/2;
-                Element<T> *start = pos;
-                Element<T> *end = pos;
-                while(num > 1){
-                //      cout << end->get_value() << " -> ";
-                        end = end->get_next();
-                        --num;
-                }               
+    void reverse(size_t num){
+            if(num <= 1) return;
+            size_t half = num/2;
+            Element<T> *start = pos;
+            Element<T> *end = pos;
+            while(num > 1){
+            //      cout << end->get_value() << " -> ";
+                    end = end->get_next();
+                    --num;
+            }               
 //              cout << end->get_value() << ";" << endl;
-                while(half){
+            while(half){
 //                      cout << start->get_value()<< " <-> " << end->get_value() << endl;
-                        start->swap(end);
-                        start = start->get_next();
-                        end   = end->get_prev();
-                        --half;
-                }
-        } 
-        
-        size_t size(){
-                return num_elems;
-        }
+                    start->swap(end);
+                    start = start->get_next();
+                    end   = end->get_prev();
+                    --half;
+            }
+    } 
+    
+    size_t size(){
+            return num_elems;
+    }
 
-        vector<T> get_vec(){
-                vector<T> values(num_elems);
-                Element<T> *tmp = first;
-                for(int i = 0; i < num_elems; ++i){
-                        values[i] = tmp->get_value();
-                        tmp = tmp->get_next();
-                }
-                return values;
-        }
-        T get_mul(){
-                return first->get_value() * first->get_next()->get_value();
-        }
+    vector<T> get_vec(){
+            vector<T> values(num_elems);
+            Element<T> *tmp = first;
+            for(int i = 0; i < num_elems; ++i){
+                    values[i] = tmp->get_value();
+                    tmp = tmp->get_next();
+            }
+            return values;
+    }
+    T get_mul(){
+            return first->get_value() * first->get_next()->get_value();
+    }
     bool operator ==(Ringbuffer &rb){
         if(num_elems != rb.num_elems) return false;
         auto elem1 = first;
@@ -203,23 +241,45 @@ public:
     template<class T2> 
     friend ostream & operator <<(ostream &op,Ringbuffer<T2> &); 
 };
-
+#define DEBUG
 template<typename T> ostream & operator <<(ostream &op,Ringbuffer<T> &rb) {
     auto size = rb.size();
     op << "RB[" << size <<"]: { ";
-    auto elem = rb.first;
-/*    for(int i = 1; i < size; ++i){
-        op << *elem << ", ";
-        if( i && !(i % 10)) op << "\n\t";
-        elem = elem->get_next();
-    }
-*/ 
-    for(int i = 1; i < size; ++i){
-        op << *elem;
-        elem = elem->get_next();
+    if(!size){
+        op << "- }";
+        return op;
     }
 
-    op << *elem << " }";
+    auto elem = rb.first;
+
+    #ifdef DEBUG
+        for(int i = 1; i < size; ++i){
+            if(elem == rb.pos) {
+
+                op << "\033[1;31m";
+                op << "("<<*elem << ") ";
+                op << "\033[0m";
+            } else 
+                op << *elem << " ";
+            if( i && !(i % 10)) op << "\n\t";
+            elem = elem->get_next();
+        }
+     
+        if(elem == rb.pos) 
+            op << "("<< *elem << ") }";
+        else 
+            op << *elem << " }";
+    #else
+
+
+        for(int i = 1; i < size; ++i){
+            op << *elem;
+            elem = elem->get_next();
+        }
+            op << *elem << " }";
+
+    #endif
+
     return op;
 }
 
