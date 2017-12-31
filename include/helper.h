@@ -27,6 +27,7 @@ using std::cout;
 using std::cerr;
 using std::clog;
 using std::endl;
+using std::cin;
 using std::string;
 using std::vector;
 using std::array;
@@ -74,6 +75,32 @@ vector<string> get_one_line(string delim, string filename, bool skip_spaces){
 	return ret;
 
 }
+
+vector<vector<string>> get_lines(string delim, string filename, bool skip_spaces){
+    std::ifstream infile(filename, std::ifstream::in);
+    if(infile.fail()){
+        cout << "an error occured; file " << filename << " could not be opened!" << endl;
+        exit(-1);
+    }
+	vector<vector<string> > ret;
+
+    if(skip_spaces) infile >> std::noskipws;
+	string line;
+    size_t pos;
+    while (std::getline(infile, line)) {
+        vector<string> line_vec;
+        while ((pos = line.find(delim)) != std::string::npos) {
+            line_vec.push_back(line.substr(0, pos));
+            line.erase(0, pos + delim.length());
+        }
+        if(line.size()) line_vec.push_back(line);
+        ret.push_back(line_vec);
+	}
+
+	return ret;
+
+}
+
 
 
 string get_output(const char *exe_path, const char *exe, const char *argv){
