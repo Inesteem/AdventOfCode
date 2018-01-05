@@ -1,16 +1,17 @@
 #include "include/helper.h"
 
-enum Dir {DOWN = 1, UP = 2, LEFT = 4, RIGHT = 8};
-const char *DIRS[] =  {"DOWN", "UP  ", "LEFT", "RIGHT"};
+enum Dir {FIN = 0, DOWN = 1, UP = 2, LEFT = 4, RIGHT = 8};
+const char *DIRS[] =  {"FIN ", "DOWN", "UP  ", "LEFT", "RIGHT"};
 enum Way {BLANC = 0, VERTIC = 1, HORIZ = 2, CROSS = 4};
 
 struct Field{
     int x,y;
     int width, height;
     vector<vector<int> > field;
-    int last_dir;
+    string path;
+    Dir dir;
     Field(vector<string> &lines):x(0),y(0),width(lines[0].size()),height(lines.size()), 
-            field(vector<vector<int> >(height)), last_dir(0xf){
+            field(vector<vector<int> >(height)), path(""), dir(DOWN){
         x = lines[0].find("|");
         assert(x != std::string::npos);
         int width = lines[0].size();
@@ -28,71 +29,63 @@ struct Field{
             }
         }
     }
-
-    inline bool check_dir(Dir dir){
-        return last_dir & dir;
-    }
-
-    inline void set_last_dir(Dir dir){
-        if(get_elem() == CROSS) last_dir = 0xf ^ dir;
-        else last_dir = dir; 
-    }
-    inline bool valid(){
-        return x > 0 && y > 0 && x < width && y < height;
-    }
- 
-    Way skip_way(Way to_skip, int xoff, int yoff){
-
-        if(!valid()) return BLANC;
-        while(get_elem() == to_skip){
-            x += xoff;
-            y += yoff;
-        } 
-        return (Way) get_elem();
-    }
-
-    bool new_dir(Dir ndir, Way fway, int xoff, int yoff){
-        if(!check_dir(ndir) ) return false;
-
-        int xold = x, yold = y;
-        x += xoff;
-        y += yoff;
-        auto nway = skip_way(fway, xoff, yoff);
-        if(nway == BLANC) {
-            x = xold;
-            y = yold;
-            return false;
-        }
-        if(field[yold][xold] != fway) field[yold][xold] = BLANC;
-        set_last_dir(ndir);
-        return true;
-    }
-
-
-    bool go_up(){
-
-        return new_dir(UP, HORIZ, 0, -1);
-    }
-    bool go_down(){
-
-        return new_dir(DOWN, HORIZ, 0, 1);
-    }
-
-    bool go_right(){
-
-        return new_dir(RIGHT, VERTIC, 1,0);
-    }
-
-    bool go_left(){
-
-        return new_dir(LEFT, VERTIC, -1, 0);
-    }
-
-    int get_elem(){
+    inline int get_elem(){
         return field[y][x];
     }
+    inline bool out_of_bounce(){
+
+        if(y < 0 || x < 0 || x >= width || y >= height || get_elem() == BLANC){
+            return true;
+        }
+        return false;
+    }
+
+    inline void set_new_dir(){
+        if(dir != UP && dir != DOWN){
+            if(y && field[y-1][x] != BLANC)
+                dir = UP; 
+            else if(y < height - 1 && field[y+1][x] != BLANC)
+                dir = DOWN;
+            return ;
+        }
+        
+        if(dir != LEFT && dir != RIGHT){
+            if(x && field[y][x-1] != BLANC)
+                dir = LEFT; 
+            
+            if(x < width - 1 && field[y][x+1] != BLANC)
+                dir = RIGHT; 
+            return;
+        }
+        
+    }
+
+    string go(){
+        
+        int elem;
+        while(true){
+            print();
+            elem = get_elem();
+            if(elem > CROSS){
+                path += (unsigned char) elem;
+            } 
+            else if(elem == CROSS){
+                set_new_dir();
+            }
+            
+            if(dir == UP)           --y;
+            else if(dir == DOWN)    ++y;
+            else if(dir == RIGHT)   ++x;
+            else if(dir == LEFT)    --x;
+            if(out_of_bounce()) break;
+        }
+
+        return path;
+    }
+
     void print(){
-        cout << x << " , " << y << endl;
+        cout << x << " , " << y << ": " << path << endl;
+        return;
         for(int h = 0; h < height; ++h){
             for(int w = 0; w < width; ++w){
                 auto elem = field[h][w];    
@@ -120,17 +113,7 @@ int main(int argc, char *argv[]){
     string output;
 	auto lines = get_one_line("\n", argv[1], true);
     Field field(lines);
-    string path = "";
-    unsigned char elem;
-    while(true){
-        field.print();
-        if((elem = (unsigned char) field.get_elem()) > 4) path += elem;
-        if(field.go_down()) continue;
-        if(field.go_left()) continue;
-        if(field.go_right()) continue;
-        if(field.go_up()) continue;
-        break;
-    }   
+    string path = field.go(); 
     cout << "path " << path << endl;
   
    	return 0;
