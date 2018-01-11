@@ -1,4 +1,4 @@
-
+import math
 
 class Image:
     def __init__(self):
@@ -30,6 +30,28 @@ class Image:
             print line
             for i in xrange(len(line)):
                 l[int(j/num)*numParts+i].pixels.append(line[i])
+
+def mergeImg(imgList):
+    if len(imgList) == 0:
+        return
+
+    ret = Image()
+    numImgs = math.sqrt(len(imgList))
+    assert numImgs == int(numImgs), "no valid image list!"
+    numImgs = int(numImgs)
+    size = imgList[0].size
+    assert (size == 2 ) or ( size == 3 ), "no valid part images"
+    for img_r in xrange(numImgs):
+        for img_c in xrange(numImgs):
+            for row in xrange(size):
+                line = []
+                for col in xrange(size):
+                    line.append(imgList[img_r * numImgs +
+                        img_c].pixels[row][col])
+            ret.pixels.append(line)
+ 
+    ret.size = numImgs * size
+    return ret
 
 class Rule:
     def __init__(self):
@@ -74,3 +96,10 @@ img.pixels = [  "123456789",
 l_pics = []
 img.getImgs(l_pics)
 print l_pics
+
+
+mImg = mergeImg(l_pics)
+print "old : " 
+print img
+print "new : " 
+print mImg
