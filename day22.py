@@ -16,26 +16,35 @@ class Grid:
     def __str__(self):
         sstr = str(self.current) + " [" + str(self.width) + "x" + str(self.height) + "]:\n" #+str(self.nodes)
         tmp = self.nodes[self.current[1]][self.current[0]]
-        if(self.infected()):
-            self.nodes[self.current[1]][self.current[0]] = '!'
-        else:
-            self.nodes[self.current[1]][self.current[0]] = 'o'
+        self.nodes[self.current[1]][self.current[0]] = 'o'
         for line in self.nodes:
             sstr += ''.join(line) + "\n" 
        
         self.nodes[self.current[1]][self.current[0]] =tmp 
         return sstr
 
-    def infected(self):
+    def getsInfected(self):
         x = self.current[0]
         y = self.current[1]
-        return (self.nodes[y][x] == '#')
+        return (self.nodes[y][x] == 'w')
 
     def turnRight(self):
         self.dir = (self.dir + 1) % 4
 
     def turnLeft(self):
         self.dir = (self.dir - 1) % 4
+
+    def chooseDir(self):
+        x = self.current[0]
+        y = self.current[1]
+        if(self.nodes[y][x] == '.'):
+            self.dir = (self.dir - 1) % 4
+             
+        elif(self.nodes[y][x] == '#'):
+            self.dir = (self.dir + 1) % 4
+        
+        elif(self.nodes[y][x] == 'f'):
+            self.dir = (self.dir + 2) % 4
 
     def goForward(self):
         x = self.current[0]
@@ -74,7 +83,11 @@ class Grid:
         x = self.current[0]
         y = self.current[1]
         if self.nodes[y][x] == '.':
+            self.nodes[y][x] = 'w'
+        elif self.nodes[y][x] == 'w':
             self.nodes[y][x] = '#'
+        elif self.nodes[y][x] == '#':
+            self.nodes[y][x] = 'f'
         else:
             self.nodes[y][x] = '.'
 
@@ -101,17 +114,12 @@ getGrid(grid)
 
 infectedNodes = 0
 bursts = 0
-while bursts != 10000:
-    if grid.infected():
-        grid.turnRight()
-       # infectedNodes -= 1
-    else:
-        grid.turnLeft()
+while bursts != 10000000:
+    if grid.getsInfected():
         infectedNodes += 1
-
+    grid.chooseDir()
     grid.swapNode()
     grid.goForward()
     bursts += 1
-print grid
 print "infected nodes : " + str(infectedNodes)
 print "bursts: " + str(bursts)
