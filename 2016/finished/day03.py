@@ -11,7 +11,7 @@ class Triangle:
         self.b = b
         self.c = c
     def __str__(self):
-        return str(self.x) + ', ' + str(self.y)
+        return str(self.a) + ', ' + str(self.b)+ ', ' + str(self.c)
 
     def check(self):
         if self.a + self.b <= self.c :
@@ -32,17 +32,17 @@ def getTriangles(path, triangles):
     t1 = Triangle()
     t2 = Triangle()
     t3 = Triangle()
-    int num = 0
+    num = 0
     for line in data:
         num += 1
         x1,x2,x3 = (str(x) for x in line.split())
         x3 = str(x3.rstrip('\r\n'))
 
-        if num % 3 == 1:
+        if num == 1:
             t1.a = int(x1) 
             t2.a = int(x2) 
             t3.a = int(x3) 
-        elif num % 3 == 2:
+        elif num == 2:
             t1.b = int(x1) 
             t2.b = int(x2) 
             t3.b = int(x3) 
@@ -53,7 +53,10 @@ def getTriangles(path, triangles):
             triangles.append(t1)
             triangles.append(t2)
             triangles.append(t3)
-
+            t1 = Triangle()
+            t2 = Triangle()
+            t3 = Triangle()
+            num = 0
 
 tris = []
 
@@ -62,7 +65,7 @@ num = 0
 for tri in tris:
     if tri.check():
         num += 1
-    
+    print tri 
 print num
 
 
