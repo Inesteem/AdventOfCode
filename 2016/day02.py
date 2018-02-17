@@ -56,8 +56,8 @@ numgrid = [
           ]
 moves = []
 
-#getMoves('input/code',moves)
-getMoves('input/test',moves)
+getMoves('input/code',moves)
+#getMoves('input/test',moves)
 numbers = []
 pos = [0,2]
     
