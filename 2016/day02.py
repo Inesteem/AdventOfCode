@@ -19,6 +19,8 @@ class Move:
             return
         if(n_pos[1] < 0 or n_pos[1] >= len(grid)):
             return
+        if(grid[n_pos[1]][n_pos[0]] == '*'):
+            return
         pos[0] = n_pos[0]
         pos[1] = n_pos[1]
          
@@ -45,12 +47,19 @@ def getMoves(path, moves):
         moves.append(m_line)
 
 
-numgrid = [[1,2,3],[4,5,6],[7,8,9]]
+numgrid = [
+            ['*','*','1','*','*'],
+            ['*','2','3','4','*'],
+            ['5','6','7','8','9'],
+            ['*','A','B','C','*'],
+            ['*','*','D','*','*']
+          ]
 moves = []
 
-getMoves('input/code',moves)
+#getMoves('input/code',moves)
+getMoves('input/test',moves)
 numbers = []
-pos = [1,1]
+pos = [0,2]
     
 for m_list in moves:
     for m in m_list:
