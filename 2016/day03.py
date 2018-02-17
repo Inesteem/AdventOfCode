@@ -29,13 +29,30 @@ class Triangle:
 def getTriangles(path, triangles):
     with open(path, "r") as f:
         data = f.readlines()
-
+    t1 = Triangle()
+    t2 = Triangle()
+    t3 = Triangle()
+    int num = 0
     for line in data:
-        a,b,c = (str(x) for x in line.split())
-        c = str(c.rstrip('\r\n'))
-        t = Triangle(int(a), int(b), int(c))
-        triangles.append(t)
+        num += 1
+        x1,x2,x3 = (str(x) for x in line.split())
+        x3 = str(x3.rstrip('\r\n'))
 
+        if num % 3 == 1:
+            t1.a = int(x1) 
+            t2.a = int(x2) 
+            t3.a = int(x3) 
+        elif num % 3 == 2:
+            t1.b = int(x1) 
+            t2.b = int(x2) 
+            t3.b = int(x3) 
+        else:
+            t1.c = int(x1) 
+            t2.c = int(x2) 
+            t3.c = int(x3) 
+            triangles.append(t1)
+            triangles.append(t2)
+            triangles.append(t3)
 
 
 tris = []
