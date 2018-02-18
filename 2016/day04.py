@@ -1,19 +1,20 @@
 #import math
 #import sys
 import operator
-
+import re
 def reverse(string):
     string = string[::-1]
     return string
 
 class Room:
     def __init__(self):
+        self.list = []
         self.ll = ""
         self.id = -1
         self.crc = None
         self.map = {}
     def __str__(self):
-        return str(self.id) + ": [" + self.crc + "] " +  str(self.ll)
+        return str(self.id) + ": [" + self.crc + "] " +  re.sub('[,\[\]\']', '', str(self.list))
    
     def check_crc(self):
         #self.ll =  ''.join(sorted(self.ll))
@@ -29,14 +30,18 @@ class Room:
         num = 0
         crc = ""
         for i in sorted_l:
-            print i[1]   
             if num < 5:
                 crc += i[0]
                 num += 1
              
-        print "-> " + crc
         return crc == self.crc
-    
+
+    def decrypt(self):
+        for sl in xrange(len(self.list)):
+               s = ""
+               for c in xrange(len(self.list[sl])):
+                    s += chr((ord(self.list[sl][c]) - ord('a') + self.id)%26 + ord('a'))
+               self.list[sl] = s      
 #        sorted_map = sorted( self.map.items(), key=operator.itemgetter(1), reverse=True)
 #        for i in sorted_map:
 #            print i       
@@ -48,8 +53,9 @@ def getRooms(path, rooms):
         r = Room()
         ll =  line.split("-")
         info = ll[len(ll)-1].rstrip('\r\n')
-        ll = ll[:-1]
-        for s in ll:
+        r.list = ll[:-1]
+        
+        for s in r.list:
             r.ll += s
         r.crc = info[info.find("[")+1:info.find("]")]
         r.id = int(info[:info.find("[")])
@@ -62,6 +68,7 @@ getRooms('input/decoy',rooms)
 for r in rooms:
     if r.check_crc():
         idsum += r.id
+    r.decrypt()
     print r
 
 print idsum
