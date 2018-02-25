@@ -11,18 +11,14 @@ if args.id != None:
 
 
 index = 0
-pw = ''
+pw = '00000000'
 while len(pw) < 8:
     hash_t = door_id + str(index)
     m = md5.new()
     m.update(hash_t)
     tmp = m.hexdigest()
     if tmp[:5] == "00000":
-        pw += tmp[5]
-        print pw
-        print tmp
-        print "index: " + str(index)
-        print "hash: " + hash_t
+        pw[int(tmp[5]) % 8] = tmp[6]
     index += 1
 
 print pw
