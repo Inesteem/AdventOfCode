@@ -38,9 +38,7 @@ worth = 7130700 #* 100
 
 player_scores = player_num * [0]
 
-elements = []
-for i in range(0,worth):
-    elements.append(Element(i,i,0,0))
+elements = [Element(0,0,0,0)]
 
 current = 0 
 next_free = 1
@@ -55,8 +53,7 @@ for turn in range(1,worth+1):
         player_scores[turn % player_num] += turn + removed_elem.value 
 
     else:
-        elements[next_free].idx = next_free
-        elements[next_free].value = turn
+        elements.append(Element(turn,next_free,0,0))
         elements[current].insert_after(1, next_free, elements)
         current = next_free 
         next_free += 1
