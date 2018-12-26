@@ -8,7 +8,19 @@ class Node():
     def __init__(self):
         self.childs = []
         self.data= []
-  
+ 
+    def get_value(self, nodes):
+        meta_data = 0
+        if len(self.childs) == 0:
+            for d in self.data:
+                meta_data += d
+        else: 
+            for d in self.data:
+                if d == 0 or d > len(self.childs):
+                    continue
+                meta_data += nodes[self.childs[(d - 1)]].get_value(nodes)
+        return meta_data 
+
 class Pair():
 
     def __init__(self, idx, n_id):
@@ -55,4 +67,10 @@ for n in nodes:
     print(n.data)
     print("-----")
 
+print("meta data : " + str(meta_data))
+
+
+# part 2
+
+meta_data = nodes[0].get_value(nodes)  
 print("meta data : " + str(meta_data))
