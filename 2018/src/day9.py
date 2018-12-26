@@ -1,7 +1,7 @@
 import sys
 
 player_num = 439
-worth = 71307
+worth = 71307 * 100
 
 current = 1
 
