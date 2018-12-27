@@ -32,17 +32,16 @@ def power_of_region(x_len, y_len, grid, s):
 
 
 
-grid = [] 
+grid = size * [size * []] 
 
-assert(power_level(3,5,8) == 4)
-assert(power_level(122,79,57) == -5)
-assert(power_level(217,196,39) == 0)
-assert(power_level(101,153,71) == 4)
+#assert(power_level(3,5,8) == 4)
+#assert(power_level(122,79,57) == -5)
+#assert(power_level(217,196,39) == 0)
+#assert(power_level(101,153,71) == 4)
 
 for y in range(0,size):
-    grid.append([])
     for x in range(0,size):
-        grid[y].append(power_level(x+1,y+1,serial))
+        grid[y][x] = (power_level(x+1,y+1,serial))
 
 
 max_val=0
