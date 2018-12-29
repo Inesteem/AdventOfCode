@@ -28,13 +28,19 @@ for i in range(2,len(lines)):
     rules[rule[0]] = rule[1];
 
 
-
 start_idx = 0
 pot_num = 0
+last_pot_num = 0
+#for gen in range(0,50000000000):
+for gen in range(0,1000):
 
-for gen in range(0,20):
-    print(str(gen) + ": " + pots)
-
+#    print(str(gen) + ": " + pots)
+    pot_num = get_pot_count(pots,start_idx)
+    diff = pot_num - last_pot_num 
+    print(str(gen) + ": " +  str(pot_num) + "  " + str(diff))
+    if gen > 1000:
+        assert(diff == 42)
+    last_pot_num = pot_num 
     if append_dots(pots,rules,4):
         pots = "...." + pots + "....." 
         start_idx -= 2
@@ -57,8 +63,18 @@ for gen in range(0,20):
         new_gen += next_pot
     pots = new_gen
     pot_num = get_pot_count(pots, start_idx)
+    while pots[0] == ".":
+        pots = pots[1:]
+        start_idx += 1
+    while pots[-1] == ".":
+        pots = pots[:-1]
+
+
     print(str(start_idx) + "  " +  str(pot_num))    
     
+
+print(str(pot_num + (50000000000 - 1000) * 42))
+#print(str(pot_num + (2000 - 1000) * 42))
 
 #print(get_pot_count(".#....##....#####...#######....#.#..##.",-3))
 
