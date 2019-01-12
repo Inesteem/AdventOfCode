@@ -3,36 +3,23 @@ import re
 import sys 
 from operator import add
 
-go_right = [0 , 1]
-go_left  = [0 ,-1]
-go_up    = [-1 , 0]
-go_down  = [1 , 0]
+go_right = 2
+go_left  = 0
+go_up    = 1
+go_down  = 3
 
 
-directino = [[0,-1],[-1,0], [0,1], [1,0]]
+directin = [[0,-1],[-1,0], [0,1], [1,0]]
 
 def take_intersection(cart):
     if cart.cross == 0:#left
-        if match(cart.dir, go_left):
-            cart.dir = go_down
-        elif match(cart.dir, go_right):
-            cart.dir = go_up
-        elif match(cart.dir, go_up):
-            cart.dir = go_left
-        else:
-            cart.dir = go_right
-
+        cart.dir -= 1
     elif cart.cross == 2:#right
-        if match(cart.dir, go_left):
-            cart.dir = go_up
-        elif match(cart.dir, go_right):
-            cart.dir = go_down
-        elif match(cart.dir, go_up):
-            cart.dir = go_right
-        else:
-            cart.dir = go_left
+        cart.dir += 1
         cart.cross = -1
+
     cart.cross += 1
+    cart.dir %= 4
 
 
 def match(p1, p2):
@@ -47,34 +34,27 @@ class Cart:
         self.alive = True
 
     def move(self, lines):
-        next_pos = list(map(add, self.pos, self.dir)) 
+        next_pos = list(map(add, self.pos, directions[self.dir])) 
         
         c = lines[next_pos[0]][next_pos[1]]
 
         #TODO: array with dirs, then go left/right by modulo op 
     
         if c == '\\':
-            if match(self.dir , go_right):
-                self.dir = go_down
-            elif match(self.dir , go_left):
-                self.dir = go_up 
-            elif match(self.dir , go_up):
-                self.dir = go_left 
-            else: #go_down
-                self.dir = go_right 
+            if self.dir == go_right or self.dir == go_left:
+                self.dir += 1
+            else: 
+                self.dir -= 1
         elif c == '/':
-            if match(self.dir , go_right):
-                self.dir = go_up 
-            elif match(self.dir , go_left):
-                self.dir = go_down 
-            elif match(self.dir , go_up):
-                self.dir = go_right  
-            else: #go_down
-                self.dir = go_left             
+            if self.dir == go_right or self.dir == go_left:
+                self.dir -= 1
+            else: 
+                self.dir += 1
         elif c == '+':
             take_intersection(self)
 
         self.pos = next_pos 
+        cart.dir %= 4
 
 
     def to_str(self):
