@@ -9,7 +9,7 @@ go_up    = 1
 go_down  = 3
 
 
-directin = [[0,-1],[-1,0], [0,1], [1,0]]
+directions = [[0,-1],[-1,0], [0,1], [1,0]]
 
 def take_intersection(cart):
     if cart.cross == 0:#left
@@ -38,8 +38,6 @@ class Cart:
         
         c = lines[next_pos[0]][next_pos[1]]
 
-        #TODO: array with dirs, then go left/right by modulo op 
-    
         if c == '\\':
             if self.dir == go_right or self.dir == go_left:
                 self.dir += 1
@@ -126,7 +124,7 @@ while 1:
             for c2 in carts:
                 if c1.id == c2.id: #or not c2.alive: 
                     continue
-                if matches(c1.pos, c2.pos):
+                if c1.pos == c2.pos:
                     c1.alive = False    
                     c2.alive = False    
 
