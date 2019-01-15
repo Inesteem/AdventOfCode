@@ -1,48 +1,51 @@
-#fname = "../data/day2.txt"
-fname = "../data/test.txt"
-with open(fname) as f:
-    content = f.readlines()
-    # you may also want to remove whitespace characters like `\n` at the end of each line
-    content = [x.strip() for x in content]
-    
-#part 1
-crc2 = 0
-crc3 = 0
+import re
+import sys
 
-for cstr in content:
-    for c in cstr:
-        if cstr.count(c) == 2:
-            crc2 += 1
-            break
+field = []
 
 
-for cstr in content:
-    for c in cstr:
-        if cstr.count(c) == 3:
-            crc3 += 1
-            break
-crc = crc2 * crc3 
-print("checksum: " + str(crc))
+lines = [line.rstrip('\n') for line in open('../data/day3.dat')]
+#lines = [line.rstrip('\n') for line in open('../data/test.dat')]
 
-#part2
-
-
-merged_strings = {}
-
-for ai in range(0,len(content)):
-    for bi in range(0,len(content)):
-        if ai == bi:
-            continue 
-        
-        u=zip(content[ai],content[bi])
-        res = ""
-        cnt = 0
-        for i,j in u:
-            if i==j:
-                res += i
-            else:
+for line in lines:
+    shit,x_pos,y_pos,x_len,y_len = re.split('#[\w]+ @ |,|: |x',line)
+    print(str(x_pos) + " " + str(y_pos) + " " + str(x_len) + " " + str(y_len) + " ")
+    for i in range(0, int(y_pos) + int(y_len)):
+        if len(field) <= i:
+            field.append([])
+        while len(field[i]) < int(x_pos) + int(x_len):
+            field[i].append(0)
+        if(i >= int(y_pos)):
+            for x in range(int(x_pos), int(x_pos) + int(x_len)):
+                field[i][x] += 1 
+cnt = 0;
+for row in field:
+    for elem in row:
+        if elem == 0:
+            sys.stdout.write('.')
+        else:
+            sys.stdout.write(str(elem))
+            if elem > 1:
                 cnt += 1
-        merged_strings[cnt] = res 
+    sys.stdout.write('\n')
 
-for key, value in merged_strings.items():
-        print (str(key) + " " +  value)
+sys.stdout.flush()
+print(cnt)
+
+
+for line in lines:
+    shit, num, x_pos,y_pos,x_len,y_len = re.split('#| @ |,|: |x',line)
+    print(str(num) + " " + str(x_pos) + " " + str(y_pos) + " " + str(x_len) + " " + str(y_len) + " ")
+    overlap = 0
+    for y in range(int(y_pos), int(y_pos) + int(y_len)):
+        for x in range(int(x_pos), int(x_pos) + int(x_len)):
+            if field[y][x] > 1:
+                overlap = 1
+                break
+        if overlap == 1: 
+            break
+    if overlap == 0:
+        print(str(num))
+        break 
+
+
