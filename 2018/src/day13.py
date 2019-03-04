@@ -19,11 +19,11 @@ def take_intersection(cart):
         cart.cross = -1
 
     cart.cross += 1
-    cart.dir %= 4
+#    cart.dir %= 4 done in move function
 
 
 def match(p1, p2):
-    return p1[0] == p2[0] and p1[1] == p2[1]
+    return p1 == p2
 
 class Cart:
     def __init__(self, p, d, cid):
@@ -67,8 +67,11 @@ class Cart:
 
         return "v"
 
-lines = [line.rstrip('\n') for line in open('../data/day13.dat')]
-#lines = [line.rstrip('\n') for line in open('../data/test.dat')]
+
+if len(sys.argv) > 1:
+    lines = [line.rstrip('\n') for line in open('../data/test.dat')]
+else:
+    lines = [line.rstrip('\n') for line in open('../data/day13.dat')]
 
 
 carts = []
@@ -126,7 +129,8 @@ while 1:
                     continue
                 if c1.pos == c2.pos:
                     c1.alive = False    
-                    c2.alive = False    
+                    c2.alive = False 
+                    print("place of crash: " + str(c1.pos[1]) + "," + str(c1.pos[0]))
 
 
     for i in range(len(carts)-1,-1,-1):
@@ -134,7 +138,12 @@ while 1:
             del carts[i]
 
     if len(carts) == 1:
-        print(carts[0].pos[1])
-        print(carts[0].pos[0])
+        print("position of last cart: " + str(carts[0].pos[1]) + "," + str(carts[0].pos[0]))
         exit(0)
+    elif len(carts) == 0:
+        print("all cars are dead!")
+        exit(0)
+
+    carts = sorted(sorted(carts, key = lambda x : x.pos[1]), key = lambda x : x.pos[0])
+
     #input("")
