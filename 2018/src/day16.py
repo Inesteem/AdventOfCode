@@ -78,9 +78,9 @@ def eqrr(regs, r1, r2, r_dst):
 
 
 
-#instr_mem = [ [addr, addi, mulr, muli, banr, bani, borr, bori, setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr] for i in range(0,16)]
+instr_mem = [ [addr, addi, mulr, muli, banr, bani, borr, bori, setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr] for i in range(0,16)]
 
-instr_mem =  [addr, addi, mulr, muli, banr, bani, borr, bori, setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr] 
+#instr_mem =  [addr, addi, mulr, muli, banr, bani, borr, bori, setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr] 
 
 
 
@@ -89,7 +89,6 @@ if len(sys.argv) > 1:
 else:
     lines = [line.rstrip('\n') for line in open('../data/day16.dat')]
 
-dreier=0
 last_idx = 0
 for i in range(0, len(lines), 4):
     if len(lines[i]) == 0:
@@ -106,18 +105,38 @@ for i in range(0, len(lines), 4):
     regs_b = [int(before[1]), int(before[2]),int(before[3]),int(before[4])]
     regs_a = [int(after[1]), int(after[2]),int(after[3]),int(after[4])]
 
-    valid_funcs = 0
-    for func in instr_mem:
+    for fi in range(len(instr_mem[instr[0]])-1, -1, -1):
         tmp = regs_b.copy()
         try:
-            func(tmp, instr[1], instr[2], instr[3])
-            if tmp == regs_a:
-                valid_funcs += 1 
+            instr_mem[instr[0]][fi](tmp, instr[1], instr[2], instr[3])
+            if tmp != regs_a:
+                del instr_mem[instr[0]][fi]
         except:
-           print("exception")
-    if valid_funcs >= 3:
-        print(valid_funcs)
-        dreier += 1
+                del instr_mem[instr[0]][fi]
 
+changes = True
+while changes:
+    changes = False 
+    for fi in range(0, len(instr_mem)):
+        if len(instr_mem[fi]) == 1:
+            for fj in range(0, len(instr_mem)):
+                if fi == fj or len(instr_mem[fj]) == 1:
+                    continue;
+                try:
+                    instr_mem[fj].remove(instr_mem[fi][0])
+                    changes = True 
+                except:
+                    pass 
+    
+print("execute file:") 
+while i < len(lines):
+    if len(lines[i]) == 0:
+        i=i+1
+        continue
 
-print("flotte dreier: " + str(dreier))
+    instr = [ int(x) for x in lines[i].split(' ')]
+    instr_mem[instr[0]][0](reg_file, instr[1], instr[2], instr[3])
+    print("lines " + str(i))
+    i=i+1
+
+print(reg_file)
