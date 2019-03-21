@@ -6,6 +6,14 @@ tree =  1
 lyard = 2
 border = 3
 
+def count_ressources(land):
+    num_t = 0
+    num_y = 0
+    for line in last:
+        num_t += line.count(tree)
+        num_y += line.count(lyard)
+    return num_t * num_y
+
 
 def print_land(land):
     for l1 in land:
@@ -75,6 +83,22 @@ for y in range(len(lines)):
 
 print_land(land1)
 last = land1 
+r = 100
+
+
+#cycle = [190143,203895,204486,202272,207172,208351,211140,212248,219349,218584,218286,213244,210630,205800,205412,201916,193120,
+cycle = [189090, 190143, 187525, 190740, 189601,195471,195426,199758,198062,201684,200349,202515,203895,204486,202272,207172,208351,211140,212248,219349,218584,218286,213244,210630,205800,205412,201916,193120]
+
+start = 16049
+end = 1000000000 - 1
+diff = end - start
+print(cycle[diff%len(cycle)])
+#answer: 202272
+
+
+
+exit(0)
+
 for i in range(1000000000):
     if i%2 == 0:
         simulate(land1, land2)
@@ -83,13 +107,9 @@ for i in range(1000000000):
         simulate(land2, land1)
         last = land1 
 
-    print_land(last) 
-
-num_t = 0
-num_y = 0
-for line in last:
-    num_t += line.count(tree)
-    num_y += line.count(lyard)
-
+#    print_land(last) 
+    if i == r:
+        print(str(i) + " - " + str(count_ressources(last)))
+        r = int(input()) + i
 
 print(str(num_t) + " * " + str(num_y) + " = " + str(num_y * num_t))
