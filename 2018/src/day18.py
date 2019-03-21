@@ -75,7 +75,7 @@ for y in range(len(lines)):
 
 print_land(land1)
 last = land1 
-for i in range(10):
+for i in range(1000000000):
     if i%2 == 0:
         simulate(land1, land2)
         last = land2 
