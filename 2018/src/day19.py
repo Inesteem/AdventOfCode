@@ -103,7 +103,7 @@ if len(sys.argv) > 1:
 else:
     lines = [line.rstrip('\n') for line in open('../data/day19.dat')]
 
-reg_file = [0,0,0,0,0,0]
+reg_file = [1,0,0,0,0,0]
 eip_reg = int(lines[0][4])
 eip = 0
 del lines[0]
@@ -132,5 +132,6 @@ while eip < len(lines):
 
     eip=eip+1
     #print()
+    print(str(eip) + " " + str(reg_file))
 
 print(reg_file)
