@@ -88,16 +88,30 @@ root.walk(0,regex)
 root.count_doors(0)
 end_rooms = sorted(end_rooms)
 
-while True:
-    r = end_rooms[-1]
+#star 1
+#while True:
+#    r = end_rooms[-1]
+#    for e in end_rooms:
+#        if e == r:
+#            print(r)
+#            exit(0)
+#
+#        if e[1] == r[1]:
+#            del end_rooms[-1] 
+#            break
+print(len(end_rooms))
+i = -1
+while i != - len(end_rooms):
+    r = end_rooms[i]
     for e in end_rooms:
         if e == r:
-            print(r)
-            exit(0)
+            i -= 1
+            break 
 
         if e[1] == r[1]:
             del end_rooms[-1] 
             break
 
+print(len(end_rooms))
 
 
