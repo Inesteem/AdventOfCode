@@ -103,19 +103,44 @@ if len(sys.argv) > 1:
 else:
     lines = [line.rstrip('\n') for line in open('../data/day19.dat')]
 
-reg_file = [1,0,0,0,0,0]
+reg_file = [0,0,0,0,0,0]
 eip_reg = int(lines[0][4])
 eip = 0
 del lines[0]
 
+# program given:
+r0 = 0
+r1 = 0
+#r2 = 986 star1
+r2 = 10551386 #star2
+r5 = 1
+
+while r2 >= r5:
+    tmp = r2/r5 
+    if(tmp == int(tmp)):
+        r0 += r5
+#    r3 = 1
+#    while r2 >= r3:
+#        r1 = r5 * r3
+#        if r1 == r2:
+#            r0 += r5
+#            break
+#        r3 += 1
+    r5 += 1
+
+print(r0)
+
+
 
 print("execute file:") 
+i = 0
 while eip < len(lines):
     if len(lines[eip]) == 0:
         eip=eip+1
         continue
 
-    #sys.stdout.write("ip="+str(eip) + " " + str(reg_file))
+
+#    sys.stdout.write("ip="+str(eip) + " " + str(reg_file))
 
     # reg <- eip
     reg_file[eip_reg] = eip 
@@ -126,12 +151,15 @@ while eip < len(lines):
     else: 
         instr_mem[instr[0]](reg_file, int(instr[1]), int(instr[2]), int(instr[3]))
     
-    #sys.stdout.write(" " + lines[eip] + " " + str(reg_file))
+
+ #   sys.stdout.write(" " + lines[eip] + " " + str(reg_file))
     # eip -> reg
     eip = reg_file[eip_reg] 
 
     eip=eip+1
-    #print()
-    print(str(eip) + " " + str(reg_file))
 
+  
+        
+#    print()
+#    input()
 print(reg_file)
