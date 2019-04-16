@@ -35,7 +35,7 @@ fn main() {
 //    for c in &mut code {
 //        println!("{:?}", c);
 //    }
-    print!("\nthe message is : ");
+    print!("\nstart 1: the message is : ");
 
     for x in 0..codelen {
 
@@ -47,5 +47,27 @@ fn main() {
         print!("{}", c.unwrap());
     }
     println!("");
+
+    for c in &mut code {
+        for x in 0..c.len() {
+            if c[x] == 0 {
+                c[x] = 125;
+            }
+        }
+    }
+
+    print!("\nstart 2: the message is : ");
+
+    for x in 0..codelen {
+
+        let min = code[x].iter().min().unwrap();
+        let index = (code[x].iter().position(|element| element == min).unwrap()) as u32;
+        //println!("idx : {}", index);
+
+        let c = char::from_digit(index+10, 36);
+        print!("{}", c.unwrap());
+    }
+    println!("");
+
 }
 
