@@ -14,8 +14,8 @@ fn length(s: &String)->i32{
 
 }
 
-fn get_len(s: &str)->i32{
-    let mut length = 0;
+fn get_len(s: &str)->usize {
+    let mut length: usize  = 0 ;
     let mut start = 0;
     loop {
         if start >= s.len(){
@@ -32,7 +32,7 @@ fn get_len(s: &str)->i32{
 
         let p1 = m1.unwrap() + 1 + start;
         if p1 > start+1 {
-            length += (p1 - 1 - start); 
+            length += p1 - 1 - start; 
         }
         let m2 = s[p1..].find(')');
         if m2 == None {
