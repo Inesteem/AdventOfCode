@@ -24,19 +24,30 @@ fn main() {
         .expect("something went wrong reading the file");
 
     let split_str = contents.split("\n");
-    for s in split_str {
+    for s1 in split_str {
+        let mut s = s1.clone();
         println!("");
         let mut start = 0;
         let mut decomp = String::new();
+        let mut tmp_decomp;
         loop {
             if start >= s.len(){
-                break;
+                start = 0;
+                tmp_decomp = decomp.clone();
+                s = &tmp_decomp;
+                decomp = String::new();
+            //    println!("str is now {}", s);
+                //break;
             }
 
             let m1 = s[start..].find('(');
             if m1 == None {
                 decomp += &s[start..]; 
-                break;
+                if start == 0{
+                    break;
+                }
+                start = s.len();
+                continue;
             } 
 
             let p1 = m1.unwrap() + 1 + start;
@@ -51,21 +62,20 @@ fn main() {
             start = p2 + 1; 
 
             let tmp = &s[p1..p2];
-            println!("{}", tmp);
             let args = tmp.split("x").collect::<Vec<&str>>();
             let num_chars = args[0].parse::<usize>().unwrap(); 
             let num_times = args[1].parse::<usize>().unwrap(); 
    
-            for i in 0..num_times{
+            for _i in 0..num_times{
                 decomp += &s[start..start+num_chars]; 
             }
 
             start += num_chars;
 
-            println!("{} -> {} x {}   < {} >", tmp, num_chars, num_times, decomp);
              
         }
-        println!("decompressed string: {} , length: {}", decomp, length(&decomp));
+        println!("length: {}", length(&decomp));
+        //println!("decompressed string: {} , length: {}", decomp, length(&decomp));
 
     }
 }
