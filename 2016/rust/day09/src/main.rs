@@ -3,16 +3,7 @@ use std::fs::File;
 use std::io::prelude::*;
 
 
-fn length(s: &String)->i32{
-    let mut cnt = 0;
-    for c in s.chars().enumerate(){
-        if c.1 != ' '{
-            cnt+=1;
-        }
-    }
-    cnt 
 
-}
 
 fn get_len(s: &str)->usize {
     let mut length: usize  = 0 ;
@@ -46,7 +37,7 @@ fn get_len(s: &str)->usize {
         let num_chars = args[0].parse::<usize>().unwrap(); 
         let num_times = args[1].parse::<usize>().unwrap(); 
         
-        length += get_len(s[start..start+num_chars]) * num_times; 
+        length += get_len(&s[start..start+num_chars]) * num_times; 
 
         start += num_chars;
              
