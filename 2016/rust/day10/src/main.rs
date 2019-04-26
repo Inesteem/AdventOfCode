@@ -32,7 +32,7 @@ impl Command {
         }
     }
 
-    fn execute(&self, bots: &mut HashMap<usize, Vec<usize>>, commands: & HashMap<usize, Command>, outputs: & HashMap<usize, Vec<usize>>){
+    fn execute(&self, bots: &mut HashMap<usize, Vec<usize>>, commands: & HashMap<usize, Command>, outputs: &mut HashMap<usize, Vec<usize>>){
 
         let val_low: usize;
         let val_high: usize;
@@ -57,29 +57,32 @@ impl Command {
 
         }
         assert!(bots.get(&self.bot_from).unwrap().len() == 0);
-
         if let Drain::Bot(bot) =  self.bot_low {
-            let bot_low = bots.entry(bot).or_insert(Vec::new());
-            assert!(bot_low.len() < 2);
-            bot_low.push(val_low);
-            println!("bot {} gives low ({}) to bot {}", self.bot_from, val_low, bot);
-        } else {
-            println!("bot {} gives low ({}) to output", self.bot_from, val_low);
-        }
+                let bot_low = bots.entry(bot).or_insert(Vec::new());
+                assert!(bot_low.len() < 2);
+                bot_low.push(val_low);
+                println!("bot {} gives low ({}) to bot {}", self.bot_from, val_low, bot);
+        } else if let Drain::Output(num) =  self.bot_low {
+                let v = outputs.entry(num).or_insert(Vec::new());
+                v.push(val_low);
+                println!("bot {} gives low ({}) to output", self.bot_from, val_low);
+         }
         if let Drain::Bot(bot) =  self.bot_high {
             let bot_high = bots.entry(bot).or_insert(Vec::new());
             assert!(bot_high.len() < 2);
             bot_high.push(val_high);
             println!("bot {} gives high ({}) to bot {}", self.bot_from, val_high, bot);
-        } else {
+        } else if let Drain::Output(num) =  self.bot_high {
+            let v = outputs.entry(num).or_insert(Vec::new());
+            v.push(val_high);
             println!("bot {} gives high ({}) to output", self.bot_from, val_high);
         }   
        
         if let Drain::Bot(bot) =  self.bot_low {
-            commands.get(&bot).unwrap().execute(bots, &commands, &outputs);
+            commands.get(&bot).unwrap().execute(bots, &commands, outputs);
         }   
         if let Drain::Bot(bot) =  self.bot_high {
-            commands.get(&bot).unwrap().execute(bots, &commands, &outputs);
+            commands.get(&bot).unwrap().execute(bots, &commands, outputs);
         }   
     }
 }
@@ -127,15 +130,24 @@ fn main() {
         if v.len() == 2{
             //assert!(commands.get(&bot) != None);
            // assert!(commands.get_mut(&bot) != None);
-            commands.get(&bot).unwrap().execute(&mut bots, &commands,&outputs);
+            commands.get(&bot).unwrap().execute(&mut bots, &commands,&mut outputs);
         }
     }
 //    for b in &bots {
 //        println!("{:?}", b);
 //    }
 
+
     println!("--- --- ---- -----");
+    println!("{:?}", outputs.get(&0));
     println!("--- --- ---- -----");
+    println!("{:?}", outputs.get(&1));
+    println!("--- --- ---- -----");
+    println!("{:?}", outputs.get(&2));
+    println!("--- --- ---- -----");
+    println!("{}", outputs.get(&0).unwrap()[0] * outputs.get(&1).unwrap()[0] * outputs.get(&2).unwrap()[0]);
+
+   
 
 //    for b in &bots {
 //        println!("{:?}", b);
