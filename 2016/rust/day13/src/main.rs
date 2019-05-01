@@ -115,8 +115,8 @@ fn crawl(field: &mut Vec<Vec<u64>>, pos: &Position, dst: &Position, way: u64, mi
 }
 
 
-fn crawl_50(field: &mut Vec<Vec<bool>>, pos: &Position, way: u64) {
-    if way == 50 {
+fn crawl_50(field: &mut Vec<Vec<u64>>, pos: &Position, way: u64, magic: &u64) {
+    if way == 51 {
         return;
     }
 
@@ -124,32 +124,20 @@ fn crawl_50(field: &mut Vec<Vec<bool>>, pos: &Position, way: u64) {
         return;
     }
 
-    if field[pos.y as usize][pos.x as usize] {
+    if field[pos.y as usize][pos.x as usize] <= way {
         return;
     }
 
-    field[pos.y as usize][pos.x as usize] = true;
+    field[pos.y as usize][pos.x as usize] = way;
 
-    let right = pos + (1,0);
-    let down = pos + (0,1);
+    crawl_50(field, &(pos + (1,0)), way + 1, magic);
+    crawl_50(field, &(pos + (0,1)), way + 1, magic);
 
-    let mut next_pos = vec![
-        (right.get_hamming_dist(dst), right),
-        (down.get_hamming_dist(dst), down),
-    ];
     if pos.x > 0 {
-        let left = pos + (-1,0);
-        next_pos.push((left.get_hamming_dist(dst), left));
+        crawl_50(field, &(pos + (-1,0)), way + 1, magic);
     }
     if pos.y > 0 {
-        let up = pos + (0,-1);
-        next_pos.push((up.get_hamming_dist(dst), up));
-    }
-    next_pos.sort_by(|a,b| a.0.cmp(&b.0));
-
-
-    for (d,p) in next_pos {
-        crawl(field, &p, way + 1);
+        crawl_50(field, &(pos + (0,-1)), way + 1, magic);
     }
 
     
@@ -213,16 +201,15 @@ fn main() {
     println!("\nmin: {}", min);
 
 
-    let mut field2 = vec![vec![false; 52]; 52];
+    let mut field2 = vec![vec![std::u64::MAX; 52]; 52];
 
+    crawl_50(&mut field2, &pos, 0, &magic);
 
-    crawl_50(field2, pos, 0);
-
-    let mut cnt = 0;
+    let mut cnt = 0; 
 
     for y in 0..field2.len() {
         for x in 0..field2[y].len() {
-            if field[y][x] {
+            if field2[y][x] != std::u64::MAX{
                 print!("o");
                 assert!(is_free(x as u64,y as u64, &magic));
                 cnt += 1;
@@ -239,6 +226,6 @@ fn main() {
 
     
     println!("\ncnt: {}", cnt);
+    //to low: 110
 
-    // to high: 104, 92
 }
