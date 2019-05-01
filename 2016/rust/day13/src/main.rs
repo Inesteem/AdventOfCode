@@ -115,6 +115,51 @@ fn crawl(field: &mut Vec<Vec<u64>>, pos: &Position, dst: &Position, way: u64, mi
 }
 
 
+fn crawl_50(field: &mut Vec<Vec<bool>>, pos: &Position, way: u64) {
+    if way == 50 {
+        return;
+    }
+
+    if !is_free(pos.x, pos.y, magic) {
+        return;
+    }
+
+    if field[pos.y as usize][pos.x as usize] {
+        return;
+    }
+
+    field[pos.y as usize][pos.x as usize] = true;
+
+    let right = pos + (1,0);
+    let down = pos + (0,1);
+
+    let mut next_pos = vec![
+        (right.get_hamming_dist(dst), right),
+        (down.get_hamming_dist(dst), down),
+    ];
+    if pos.x > 0 {
+        let left = pos + (-1,0);
+        next_pos.push((left.get_hamming_dist(dst), left));
+    }
+    if pos.y > 0 {
+        let up = pos + (0,-1);
+        next_pos.push((up.get_hamming_dist(dst), up));
+    }
+    next_pos.sort_by(|a,b| a.0.cmp(&b.0));
+
+
+    for (d,p) in next_pos {
+        crawl(field, &p, way + 1);
+    }
+
+    
+
+}
+
+
+
+
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -167,6 +212,33 @@ fn main() {
 
     println!("\nmin: {}", min);
 
+
+    let mut field2 = vec![vec![false; 52]; 52];
+
+
+    crawl_50(field2, pos, 0);
+
+    let mut cnt = 0;
+
+    for y in 0..field2.len() {
+        for x in 0..field2[y].len() {
+            if field[y][x] {
+                print!("o");
+                assert!(is_free(x as u64,y as u64, &magic));
+                cnt += 1;
+            }
+            else if is_free(x as u64,y as u64, &magic) {
+                print!(" ");
+            } else {
+                print!("#");
+            }
+        }
+        println!("");
+    } 
+
+
+    
+    println!("\ncnt: {}", cnt);
 
     // to high: 104, 92
 }
