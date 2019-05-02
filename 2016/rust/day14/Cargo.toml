@@ -1,0 +1,9 @@
+[package]
+name = "day14"
+version = "0.1.0"
+authors = ["Lucifer Hemp <lucifer.hemp@fau.de>"]
+edition = "2018"
+
+[dependencies]
+rust-crypto = "^0.2"
+hex = "0.3.2"
