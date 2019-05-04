@@ -33,6 +33,14 @@ fn main() {
             start_pos: info[11].parse::<usize>().unwrap(),
         });
     }
+
+    //start 2
+    discs.push( Disc {       
+        num_pos:   11,
+        start_pos: 0,
+    });
+
+
     for i in 0..std::usize::MAX {
         let mut cnt = 0;
         for d in 0..discs.len() {
