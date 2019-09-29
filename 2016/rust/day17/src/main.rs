@@ -69,63 +69,73 @@ fn main() {
 
     let mut ways: Vec<String> = Vec::new();
     let mut s_len : usize = std::usize::MAX;
+    let mut l_len : usize = 0;
     loop {
-        println!("");
+//        println!("");
         hasher.input(key);
         let way_str : String = way.iter().collect();
         if elem_at(&pos, &board)== 'V'{
-            println!("way found : {}", way_str);
+//            println!("way found : {}", way_str);
             ways.push(way_str.clone());
             s_len = way.len();
-        } 
-        hasher.input(way_str.as_bytes());
-        let mut output = [0; 16]; // An MD5 is 16 bytes
-        hasher.result(&mut output);
+            if way.len() > l_len {
+                println!("new maxlen: {}", l_len);
+                l_len = way.len();
+            }
+        } else { 
+            hasher.input(way_str.as_bytes());
+            let mut output = [0; 16]; // An MD5 is 16 bytes
+            hasher.result(&mut output);
 
-        //debug output
-        let first_four : String = hex::encode(output).chars().into_iter().take(4).collect();
-        let dec : Vec<u32>=  first_four.chars().map(|c| c.to_digit(16).unwrap()).collect();
-        println!("> {:?}", dec);
-        println!("{} - pos: {:?} - way: {}", first_four, pos, way_str);
-        println!("{:?}", output);
-        println!("{:?}", hex::encode(output));
-        for i in 0..4 {
-            if dec[i] > 10 {
-                let n_f = add_tuple(&(DIR[i].0), &pos);
-                let free = elem_at(&n_f, &board) != '#';            
-                if free {
-                    println!("{}: door open -> go: {:?}; next pos: {:?}", output[i], DIR[i], pos);
-                    checkpoints.push((i, pos, way.clone()));
+            //debug output
+            let first_four : String = hex::encode(output).chars().into_iter().take(4).collect();
+            let dec : Vec<u32>=  first_four.chars().map(|c| c.to_digit(16).unwrap()).collect();
+    //        println!("> {:?}", dec);
+    //        println!("{} - pos: {:?} - way: {}", first_four, pos, way_str);
+    //        println!("{:?}", output);
+    //        println!("{:?}", hex::encode(output));
+            for i in 0..4 {
+                if dec[i] > 10 {
+                    let n_f = add_tuple(&(DIR[i].0), &pos);
+                    let free = elem_at(&n_f, &board) != '#';            
+                    if free {
+    //                    println!("{}: door open -> go: {:?}; next pos: {:?}", output[i], DIR[i], pos);
+                        checkpoints.push((i, pos, way.clone()));
+                    } else {
+    //                    println!("{}: no door {:?}", output[i], DIR[i]);
+                    }
                 } else {
-                    println!("{}: no door {:?}", output[i], DIR[i]);
+    //                println!("{}: door closed!", output[i]);    
                 }
-            } else {
-                println!("{}: door closed!", output[i]);    
             }
         }
-        loop {
-            println!("{:?}", ways);
-            if checkpoints.len() == 0 { 
-                println!("way found:");
-                
-                for s in ways {
-                    println!("{}", s);
-                }
-                std::process::exit(-1);
-            }
+        if checkpoints.len() == 0 { 
+//            println!("way found:");
+            break;
+        }
+       // loop {
+       //     println!("{:?}", ways);
+       //     if checkpoints.len() == 0 { 
+       //         println!("way found:");
+       //         
+       //         for s in ways {
+       //             println!("{}", s);
+       //         }
+       //         std::process::exit(-1);
+       //     }
             //use last checkpoint
             let (i, pos_tmp, way_tmp) = checkpoints.pop().unwrap();
             let n_f = add_tuple(&(DIR[i].0), &pos_tmp);
             pos = add_tuple(&(DIR[i].0), &n_f);
             way = way_tmp;
             way.push(DIR[i].1);
-            if way.len() <= s_len { break};
-        }
+       //     if way.len() <= s_len { break};
+       // }
         hasher.reset();
         //pause(); 
     }
 
-
+    println!("{}", l_len);
 
 //    for line in &board {
 //        let res: String = line.iter().collect();
