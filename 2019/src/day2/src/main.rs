@@ -24,29 +24,39 @@ fn main() {
         Err(_) => process::exit(0),
             
     }
-    input_vec[1] = 12;
-    input_vec[2] = 2;
-//    input_vec = [1,0,0,0,99].to_vec();
 
-    let mut i : usize = 0;
-    while i < input_vec.len() {
-        
-        if  input_vec[i] == 99  {
-            break;
+    for noun in 0..100 {
+        for verb in 0..100 {
+            let mut program = input_vec.clone();
+            program[1] = noun;
+            program[2] = verb;
+        //    program = [1,0,0,0,99].to_vec();
+
+            let mut i : usize = 0;
+            while i < program.len() {
+                
+                if  program[i] == 99  {
+                    break;
+                }
+
+                let left_op = program[program[i+1] as usize];
+                let right_op = program[program[i+2] as usize];
+                let idx_to = program[i+3] as usize;
+                if program[i] == 1 {
+                    program[idx_to] = left_op + right_op;
+                } else if program[i] == 2 {
+                    program[idx_to] = left_op * right_op;
+                } else {
+                    assert!(false);
+                } 
+
+                i += 4;
+            }
+            if program[0] == 19690720 {
+                println!("{:?}", program);
+                println!("end found: {} {} -> {}", noun, verb, noun*100+verb);
+
+            }
         }
-
-        let left_op = input_vec[input_vec[i+1] as usize];
-        let right_op = input_vec[input_vec[i+2] as usize];
-        let idx_to = input_vec[i+3] as usize;
-        if input_vec[i] == 1 {
-            input_vec[idx_to] = left_op + right_op;
-        } else if input_vec[i] == 2 {
-            input_vec[idx_to] = left_op * right_op;
-        } else {
-            assert!(false);
-        } 
-
-        i += 4;
     }
-    println!("{:?}", input_vec);
 }
