@@ -1,11 +1,10 @@
 #include <iostream>
-#include <fstream> 
 #include <fstream>
 using namespace std;
 
 
 int main(int argc, const char * argv[]){
-	std::ifstream infile("src/day1.txt");
+	std::ifstream infile("../data/day1.txt");
 	long sum = 0;
 	int mass;
 	while(infile >> mass){
