@@ -52,7 +52,7 @@ impl Opcode {
         } else { 
             self.mode_3 = false;
         }
-       // println!("{:?} {} {} {} {}", digits, self.mode_3, self.mode_2, self.mode_1, self.instr);
+ //       println!("{:?} {} {} {} {}", digits, self.mode_3, self.mode_2, self.mode_1, self.instr);
     }
 
 
@@ -63,31 +63,48 @@ impl Opcode {
 //    Opcode 8 is equals: if the first parameter is equal to the second parameter, it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
 //
 
-    fn do_op(&mut self, program: &mut Vec<i32>, i : usize, ops: & Vec<Box<dyn Fn(&mut Vec<i32>,i32,i32,i32, usize) -> usize > > ) -> usize {
+    fn do_op(&mut self, program: &mut Vec<i32>, i : usize, ops: & Vec<(usize, Box<dyn Fn(&mut Vec<i32>,i32,i32,i32, usize) -> usize > )> ) -> usize {
       self.parse(program[i]);
-      //println!("{} {} {} {}", i , program[i+1], program[i+2], program[i+3]);
       let mut o1 = program[i+1];
       let mut o2 :i32 = 0;
       let mut o3 :i32 = 0;
 
-      if self.instr < 3 {
-          if !self.mode_1 {
-              o1 = program[o1 as usize];
-          }  
+      let num_params = ops[(self.instr - 1) as usize].0;
 
-
+ //     if num_params == 1 {
+ //         println!("{} {}", program[i] , program[i+1]);
+ //     }
+ //     if num_params == 2 {
+ //         println!("{} {} {}", program[i] , program[i+1], program[i+2]);
+ //     }
+ //     if num_params == 3 {
+ //         println!("{} {} {} {}", program[i] , program[i+1], program[i+2], program[i+3]);
+ //     }
+      self.mode_1 = (self.mode_1 || self.instr == 3);
+      if !self.mode_1 {
+          o1 = program[o1 as usize];
+      }  
+       if num_params > 1 {
           o2 = program[i+2];
           if !self.mode_2 {
               o2 = program[o2 as usize];
           }  
-
+      } if num_params > 2 {
           o3 = program[i+3];
-//          if !self.mode_3 {
+//          if !self.mode_3 && self.instr < 6{
 //              o3 = program[o3 as usize];
 //          }  
       }
-      //println!("{} {} {}", o1, o2, o3);
-      return ops[(self.instr - 1) as usize] (program, o1, o2, o3, i);
+
+
+
+      //if self.instr > 6{
+      //    if !self.mode_3 {
+      //        o3 = program[o3 as usize];
+      //    }  
+      //}
+  //    println!("{} {} {}", o1, o2, o3);
+      return ops[(self.instr - 1) as usize].1(program, o1, o2, o3, i);
     }
 }
 
@@ -117,15 +134,15 @@ fn read_inputs(filename : String) -> std::io::Result<String> {
 fn main() {
     let mut opc = Opcode::new();
 
-    let ops : Vec<Box<dyn Fn(&mut Vec<i32>,i32,i32,i32,usize) -> usize> > = vec![
-        Box::new(|v,o1,o2,o3,i| { v[o3 as usize] = o1 + o2; return 4+i}),
-        Box::new(|v,o1,o2,o3,i| { v[o3 as usize] = o1 * o2; return 4+i}),
-        Box::new(|v,o1,_,_,i|   { print!("input  : "); io::stdout().flush().unwrap(); v[o1 as usize] = read_in_int(); return 2+i}),
-        Box::new(|v,o1,_,_,i|   { println!("output : {}", v[o1 as usize]); return 2+i}),
-        Box::new(|v,o1,o2,_,i|  { if o1 != 0    {return o2 as usize;} return 3+i}),
-        Box::new(|v,o1,o2,_,i|  { if o1 == 0    {return o2 as usize;} return 3+i}),
-        Box::new(|v,o1,o2,o3,i| { if o1 < o2   {return o3 as usize;} return 3+i}),
-        Box::new(|v,o1,o2,o3,i| { if o1 == o2  {return o3 as usize;} return 3+i}),
+    let ops : Vec< (usize, Box<dyn Fn(&mut Vec<i32>,i32,i32,i32,usize) -> usize>) > = vec![
+        (3,Box::new(|v,o1,o2,o3,i| { v[o3 as usize] = o1 + o2; return 4+i})),
+        (3,Box::new(|v,o1,o2,o3,i| { v[o3 as usize] = o1 * o2; return 4+i})),
+        (1,Box::new(|v,o1,_,_,i|   { print!("input  : "); io::stdout().flush().unwrap(); v[o1 as usize] = read_in_int(); return 2+i})),
+        (1,Box::new(|v,o1,_,_,i|   { println!("output : {}", o1); return 2+i})),
+        (2,Box::new(|v,o1,o2,_,i|  { if o1 != 0    {return o2 as usize;} return 3+i})),
+        (2,Box::new(|v,o1,o2,_,i|  { if o1 == 0    {return o2 as usize;} return 3+i})),
+        (3,Box::new(|v,o1,o2,o3,i| { v[o3 as usize ] = 0; if o1 < o2   {v[o3 as usize] = 1;} return 4+i})),
+        (3,Box::new(|v,o1,o2,o3,i| { v[o3 as usize ] = 0; if o1 == o2  {v[o3 as usize] = 1;} return 4+i})),
     ];
 
 
@@ -139,11 +156,20 @@ fn main() {
         Err(_) => process::exit(0),
             
     }
-
+    println!("");
     let mut program = input_vec;
+//    program = vec![3,9,8,9,10,9,4,9,99,-1,8];
+//    program = vec![3,9,7,9,10,9,4,9,99,-1,8];
+//    program = vec![3,3,1108,-1,8,3,4,3,99];
+//    program = vec![3,3,1107,-1,8,3,4,3,99];
+//    program = vec![3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9];
+//    program = vec![3,3,1105,-1,9,1101,0,0,12,4,12,99,1];
+//    program = vec![3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104, 999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99];
+//
+
     let mut i : usize = 0;
     while i < program.len() {
-        
+//        println!("{:?}", program);        
         if  program[i] == 99  {
             break;
         }
