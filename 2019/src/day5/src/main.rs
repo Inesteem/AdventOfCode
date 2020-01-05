@@ -55,7 +55,15 @@ impl Opcode {
        // println!("{:?} {} {} {} {}", digits, self.mode_3, self.mode_2, self.mode_1, self.instr);
     }
 
-    fn do_op(&mut self, program: &mut Vec<i32>, i : usize, ops: & Vec<Box<dyn Fn(&mut Vec<i32>,i32,i32,i32) -> usize > > ) -> usize {
+
+//
+//    Opcode 5 is jump-if-true: if the first parameter is non-zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
+//    Opcode 6 is jump-if-false: if the first parameter is zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
+//    Opcode 7 is less than: if the first parameter is less than the second parameter, it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
+//    Opcode 8 is equals: if the first parameter is equal to the second parameter, it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
+//
+
+    fn do_op(&mut self, program: &mut Vec<i32>, i : usize, ops: & Vec<Box<dyn Fn(&mut Vec<i32>,i32,i32,i32, usize) -> usize > > ) -> usize {
       self.parse(program[i]);
       //println!("{} {} {} {}", i , program[i+1], program[i+2], program[i+3]);
       let mut o1 = program[i+1];
@@ -79,7 +87,7 @@ impl Opcode {
 //          }  
       }
       //println!("{} {} {}", o1, o2, o3);
-      return ops[(self.instr - 1) as usize] (program, o1, o2, o3) + i;
+      return ops[(self.instr - 1) as usize] (program, o1, o2, o3, i);
     }
 }
 
@@ -106,16 +114,18 @@ fn read_inputs(filename : String) -> std::io::Result<String> {
     println!("{}", &contents);
     Ok(contents)
 }
-
-
 fn main() {
     let mut opc = Opcode::new();
 
-    let ops : Vec<Box<dyn Fn(&mut Vec<i32>,i32,i32,i32) -> usize> > = vec![
-        Box::new(|v,o1,o2,o3|{ v[o3 as usize] = o1 + o2; return 4}),
-        Box::new(|v,o1,o2,o3|{ v[o3 as usize] = o1 * o2; return 4}),
-        Box::new(|v,o1,_,_|  { print!("input  : "); io::stdout().flush().unwrap(); v[o1 as usize] = read_in_int(); return 2}),
-        Box::new(|v,o1,_,_|  { println!("output : {}", v[o1 as usize]); return 2})
+    let ops : Vec<Box<dyn Fn(&mut Vec<i32>,i32,i32,i32,usize) -> usize> > = vec![
+        Box::new(|v,o1,o2,o3,i| { v[o3 as usize] = o1 + o2; return 4+i}),
+        Box::new(|v,o1,o2,o3,i| { v[o3 as usize] = o1 * o2; return 4+i}),
+        Box::new(|v,o1,_,_,i|   { print!("input  : "); io::stdout().flush().unwrap(); v[o1 as usize] = read_in_int(); return 2+i}),
+        Box::new(|v,o1,_,_,i|   { println!("output : {}", v[o1 as usize]); return 2+i}),
+        Box::new(|v,o1,o2,_,i|  { if o1 != 0    {return o2 as usize;} return 3+i}),
+        Box::new(|v,o1,o2,_,i|  { if o1 == 0    {return o2 as usize;} return 3+i}),
+        Box::new(|v,o1,o2,o3,i| { if o1 < o2   {return o3 as usize;} return 3+i}),
+        Box::new(|v,o1,o2,o3,i| { if o1 == o2  {return o3 as usize;} return 3+i}),
     ];
 
 
