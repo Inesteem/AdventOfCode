@@ -16,6 +16,7 @@ struct Orbit{
 struct Node<'a> {
     children:  Cell< Vec<&'a Node<'a>> >,
     name: String,
+    dist : u32,
 }
 
 impl <'a> Node<'a> {
@@ -23,7 +24,8 @@ impl <'a> Node<'a> {
     pub fn new(name : String) -> Node<'a> {
         Node {
             children: Cell::new(Vec::new()),
-            name: name 
+            name: name,
+            dist : 0,
         }
     }
 
@@ -56,6 +58,23 @@ impl <'a> Node<'a> {
 
     }
 
+    pub fn calc_dist(& mut self, dist : u32, stop : & String) -> bool{
+        self.dist = fist;
+        if self.name == stop {
+            return true;
+        }
+
+        let mut v = self.children.take();
+        for c in &v {
+            if c.calc_dist(dist+1, stop){
+                self.children.set(v);
+                return true;
+            }
+            
+        }
+        self.children.set(v);
+       return false;
+    }
     
 }
 
@@ -124,4 +143,9 @@ fn main() {
     let mut num : u32 = 0;
     root.cnt_refs(0, &mut num);
     println!("{}", num);
+    
+    let you = nodes.get(&"YOU".to_string()).unwrap();
+    you.calc_dist(0,"SAN".to_string());
+    let san = nodes.get(&"SAN".to_string()).unwrap();
+    println!("{}", san.dist);
 }
