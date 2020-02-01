@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
 use std::process;
-use std::io;
 use std::collections::HashMap;
 use std::cell::Cell;
 
@@ -16,7 +15,7 @@ struct Orbit{
 struct Node<'a> {
     children:  Cell< Vec<&'a Node<'a>> >,
     name: String,
-    dist : u32,
+    dist : Cell<i32>,
 }
 
 impl <'a> Node<'a> {
@@ -25,7 +24,7 @@ impl <'a> Node<'a> {
         Node {
             children: Cell::new(Vec::new()),
             name: name,
-            dist : 0,
+            dist : Cell::new(0),
         }
     }
 
@@ -36,7 +35,7 @@ impl <'a> Node<'a> {
     }
 
     pub fn print(&self, level : String) {
-        let mut v = self.children.take();
+        let v = self.children.take();
         print!("{}{} -[ ", level, self.name);
         for c in &v {
             print!("{} ", c.name);
@@ -49,7 +48,7 @@ impl <'a> Node<'a> {
     }
 
     pub fn cnt_refs(&self, level : u32, num : &mut u32){
-        let mut v = self.children.take();
+        let v = self.children.take();
         *num += level;
         for c in &v {
             c.cnt_refs(level+1, num);
@@ -58,24 +57,37 @@ impl <'a> Node<'a> {
 
     }
 
-    pub fn calc_dist(& mut self, dist : u32, stop : & String) -> bool{
-        self.dist = fist;
-        if self.name == stop {
-            return true;
+    pub fn calc_dist1(& self) -> i32{
+        if self.name == "YOU" {
+            return 0;
         }
 
-        let mut v = self.children.take();
+        let v = self.children.take();
         for c in &v {
-            if c.calc_dist(dist+1, stop){
+            let dist =  c.calc_dist1();
+            if dist != -1 {
                 self.children.set(v);
-                return true;
+                self.dist.set(dist+1);
+                return  dist + 1;
             }
-            
         }
         self.children.set(v);
-       return false;
+        return -1;
     }
-    
+    pub fn calc_dist2(& self, d : i32){
+
+        if self.dist.get() == 0 {
+            self.dist.set(d);
+        }
+
+        let v = self.children.take();
+
+        for c in &v {
+           c.calc_dist2(self.dist.get()+1); 
+        }
+
+        self.children.set(v);
+    }
 }
 
 
@@ -85,7 +97,7 @@ fn read_inputs(filename : String) -> std::io::Result<String> {
     let mut contents = String::new();
     buf_reader.read_to_string(&mut contents)?;
     contents.pop();
-    println!("{}", &contents);
+//    println!("{}", &contents);
     Ok(contents)
 }
 
@@ -94,9 +106,9 @@ fn read_inputs(filename : String) -> std::io::Result<String> {
 fn main() {
 
 
-    let mut tree_connections : Vec<(String,String)>;
     let mut tmp : Vec<String>;
     match read_inputs("../../../data/day6.txt".to_string()) {
+//    match read_inputs("../../../data/test.txt".to_string()) {
         Ok(inputs) =>  
             //let input_vec : Vec<u32> = inputs.split(",")
             tmp = inputs.split("\n")
@@ -138,14 +150,16 @@ fn main() {
     }
 
     let root = nodes.get(&"COM".to_string()).unwrap();
-//    root.print("".to_string());
+////    root.print("".to_string());
+//
+//    let mut num : u32 = 0;
+//    root.cnt_refs(0, &mut num);
+//    println!("{}", num);
+//    
+    root.calc_dist1();
+    root.calc_dist2(0);
 
-    let mut num : u32 = 0;
-    root.cnt_refs(0, &mut num);
-    println!("{}", num);
-    
-    let you = nodes.get(&"YOU".to_string()).unwrap();
-    you.calc_dist(0,"SAN".to_string());
     let san = nodes.get(&"SAN".to_string()).unwrap();
-    println!("{}", san.dist);
+    println!("{}", san.dist.get() - 2);
 }
+
