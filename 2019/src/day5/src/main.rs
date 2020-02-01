@@ -66,8 +66,8 @@ impl Opcode {
     fn do_op(&mut self, program: &mut Vec<i32>, i : usize, ops: & Vec<(usize, Box<dyn Fn(&mut Vec<i32>,i32,i32,i32, usize) -> usize > )> ) -> usize {
       self.parse(program[i]);
       let mut o1 = program[i+1];
-      let mut o2 :i32 = 0;
-      let mut o3 :i32 = 0;
+      let mut o2 : i32 = 0;
+      let mut o3 : i32 = 0;
 
       let num_params = ops[(self.instr - 1) as usize].0;
 
