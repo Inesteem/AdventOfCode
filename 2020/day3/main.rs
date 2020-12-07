@@ -61,16 +61,21 @@ fn main() {
         Err(_) => process::exit(0),
     }
     println!("{:?}", &map);
-
-    let slope = Point{x:3,y:1};
-    let mut pos = Point{x:0,y:0};
-    let mut trees =0;
-    while pos.y < map.len() {
-        if map[pos.y][pos.x] == '#' {
-            trees += 1;
+    let mut star2 : usize = 1;
+    let slopes : Vec<Point> = vec![Point{x:1,y:1},Point{x:3,y:1},Point{x:5,y:1},Point{x:7,y:1},Point{x:1,y:2}];
+    for slope in slopes.into_iter() {
+   // let slope = Point{x:3,y:1};
+        let mut pos = Point{x:0,y:0};
+        let mut trees =0;
+        while pos.y < map.len() {
+            if map[pos.y][pos.x] == '#' {
+                trees += 1;
+            }
+            pos.add_assign(slope);
+            pos.x %= map[0].len();
         }
         println!("{:?} -> {}", pos,trees);
-        pos.add_assign(slope);
-        pos.x %= map[0].len();
+        star2 *= trees;
     }
+    println!("star 2 {}", star2);
 }
