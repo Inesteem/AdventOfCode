@@ -1,0 +1,14 @@
+[package]
+name = "day8"
+version = "0.1.0"
+authors = ["Lucifer <lucifer.hemp@fau.de>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+input-stream = "0.3.0"
+
+[[bin]]
+name = "day8"
+path = "main.rs"
