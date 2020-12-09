@@ -2,23 +2,8 @@ use std::process;
 extern crate lib;
 
 use lib::io::read_str_from_file;
-//
-//struct Passport{
+use regex::Regex;
 
-//    byr: u16,
-//    iyr: u16,
-//    eyr: u16,
-//    hgt: str,
-//    hcl: str,
-//    ecl: str,
-//    pid: usize,
-//    cid: usize,
-//}
-
-//pub struct Field<'a>{
-//    id: &'a str,
-//    content: &'a str,
-//}
 
 #[derive(Debug)]
 pub struct Field {
@@ -47,7 +32,12 @@ impl Field {
 //        .map(|x| new Field(x.to_string())).collect();
 //    true
 //}
-
+fn in_range(content: & str, min : i32, max : i32) -> bool{ 
+    match content.parse::<i32>() {
+        Ok(ref v) => *v >= min && *v <= max,
+        Err(_) => false,
+    }
+}
 
 fn main() {
     let mut passports: Vec<Vec<Field>>;
@@ -78,25 +68,105 @@ fn main() {
     let mut num_valid : i32 = 0;
     let mut num  = 0;
     let mut cid = false;
+    let mut invalid = false;
     for i in 0..passports.len(){
         
         if passports[i].len() == 0 {
-            print!("\n{} {} ",cid,num);
-            if num == 8 || (num == 7 && !cid) {
+            //print!("\n{} {} ",cid,num);
+            if !invalid && (num == 8 || (num == 7 && !cid)) {
                 num_valid +=1;
-                print!("-> valid");
+                //print!("-> valid");
             }
-            println!("\n");
+            //println!("\n");
             num  = 0;
             cid = false;
+            invalid = false;
         }
-        
+        if invalid {continue;}
         for field in &passports[i] {
             num +=1;
-            if field.id.eq("cid") {
-                cid = true;
+            match &field.id[..] {//todo:if invalid:break
+                "cid" => cid = true,
+                "byr" => {
+                    if !in_range(&field.content[..],1920, 2002) {
+                        invalid=true;
+                        println!("invalid-> {} : {}", &field.id, &field.content);
+                        break;
+                    }
+                },
+                "iyr" => {
+                    if !in_range(&field.content[..], 2010, 2020) {
+                        invalid=true;
+                        println!("invalid-> {} : {}", &field.id, &field.content);
+                        break;
+                    }
+                },
+                "eyr" => {
+
+                    if !in_range(&field.content[..], 2020, 2030) {
+                        invalid=true;
+                        println!("invalid-> {} : {}", &field.id, &field.content);
+                        break;
+                    }
+                },
+                "hgt" => {
+                    let l = field.content.len();
+                    if l < 4 { 
+                        invalid = true;
+                        println!("invalid-> {} : {}", &field.id, &field.content);
+                        break;
+                    }
+                    let ext = &field.content[l-2..l];
+                    if ext.eq("cm"){
+                        if !in_range(&field.content[0..l-2],150,193){
+                            invalid=true;
+                            println!("invalid-> {} : {}", &field.id, &field.content);
+                            break;
+                        }
+                    } else if ext.eq("in"){
+                        if !in_range(&field.content[0..l-2],59,76){
+                            invalid=true;
+                            println!("invalid-> {} : {}", &field.id, &field.content);
+                            break;
+                        }
+                     } else { 
+                        invalid=true;
+                        println!("invalid-> {} : {}", &field.id, &field.content);
+                        break;
+                    }
+                },
+                "hcl" => {
+                    let re = Regex::new("^#(?:[0-9a-fA-F]{3}){1,2}$").unwrap();
+                    if !re.is_match(&field.content){ 
+                        invalid=true;
+                        println!("invalid-> {} : {}", &field.id, &field.content);
+                        break;
+                    } 
+                },
+                "ecl" => {
+                    if !["amb","blu","brn","gry","grn","hzl","oth"].contains(&&field.content[..]) {
+                        invalid=true;
+                        println!("invalid-> {} : {}", &field.id, &field.content);
+                        break;
+                    }
+                },
+                "pid" => {
+
+                    let re = Regex::new(r"^\d{9}$").unwrap();
+                    if !re.is_match(&field.content){ 
+                        invalid=true;
+                        println!("invalid-> {} : {}", &field.id, &field.content);
+                        break;
+                    } 
+                },
+                _ => { 
+                        invalid=true;
+                        println!("invalid-> {} : {}", &field.id, &field.content);
+                        break;
+                    },
             }
-            println!("field: {}", &field.id);
+            //println!("valid {}", &field.content);
+            //println!("field: {}", &field.id);
         }
 
     }
