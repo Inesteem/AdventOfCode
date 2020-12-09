@@ -1,7 +1,17 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
+use std::io::{self, Read};
 //use std::process;
+
+pub fn read_line_from_stdin() -> std::io::Result<String> {
+    let mut buffer = String::new();
+
+    let mut stdin = io::stdin();
+
+    stdin.read_line(&mut buffer)?;
+    Ok(buffer)
+}
 
 pub fn read_str_from_file(filename : String) -> std::io::Result<String> {
     let file = File::open(filename)?;
@@ -12,6 +22,7 @@ pub fn read_str_from_file(filename : String) -> std::io::Result<String> {
     //println!("{}", &contents);
     Ok(contents)
 }
+
 
 
 
