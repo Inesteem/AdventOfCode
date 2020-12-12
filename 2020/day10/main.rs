@@ -33,7 +33,6 @@ fn main(){
     }
     jolts.sort();
     jolts.push(jolts[jolts.len()-1]+3);
-    println!("{:?}", jolts);
 
     //star 1
     let mut diff1 = 0;
@@ -48,9 +47,7 @@ fn main(){
 
     println!("star1 = {} * {} = {}", diff1, diff3, diff1*diff3);
 
-    let ways = num_ways(0,1,&jolts,&mut mem)
-    + num_ways(0,2,&jolts,&mut mem)
-    + num_ways(0,3,&jolts,&mut mem);
+    let ways = num_ways(0,0,&jolts,&mut mem);
 
     println!("star2: {}", &ways);
 }
