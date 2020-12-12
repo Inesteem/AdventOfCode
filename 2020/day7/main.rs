@@ -23,6 +23,7 @@ impl Link {
 #[derive(Debug)]
 pub struct Node {
     pub name : String,
+//    pub num_bags: i32,
     pub links : Vec<Link>,
 }
 
@@ -31,6 +32,7 @@ impl Node {
     pub fn new(s : & str) -> Node{
         Node {
             name : s.to_string(),
+  //          num_bags : -1,
             links : Vec::<Link>::new(),
 
         }
@@ -43,6 +45,19 @@ impl Node {
            if node.search(needle,bags){ return true;}
         }
         false
+    }
+
+
+    pub fn get_num_bags(& self, bags : & HashMap<String,Node>)-> u32{
+    //    if self.num_bags != -1 { return self.num_bags; }
+      //  self.num_bags = 0;
+        let mut num_bags = 0;
+        for l in &self.links {
+           let node = bags.get(&l.node).unwrap();
+           num_bags += l.num * (node.get_num_bags(bags) + 1);
+        }
+
+        num_bags
     }
 }
 
@@ -115,5 +130,8 @@ fn main (){
             println!("{} contains a gold bag", key);
         }        
     }
-    println!("bags that can contain a gold bag (without the gold bag itself) {}",num-1);
+    println!("STAR1 - bags that can contain a gold bag (without the gold bag itself) {}",num-1);
+
+    let num_bags = bags.get(&"shinygold".to_string()).unwrap().get_num_bags(& bags);
+    println!("STAR2 - num bags : {} ", num_bags);
 }
