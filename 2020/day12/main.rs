@@ -76,7 +76,10 @@ impl Ship {
                 self.dir %= 4;
             },
 
-            _ => {println!("error while parsing: {}", a.op); exit(-1);}, // TODO: ERROR
+            _ => {
+                println!("error while parsing: {}", a.op); 
+                exit(-1);
+            },
         }
     }
 
@@ -84,6 +87,64 @@ impl Ship {
         (i32::abs(self.x) + i32::abs(self.y)) as usize
     }
 }
+
+// STAR 2
+//
+struct Ship2 {
+    x : i32,
+    y : i32,
+    way_point: WayPoint,
+}
+struct WayPoint {
+    x : i32,
+    y : i32,
+    DIRS : Vec<Direction>,
+    magic : Vec<Box<dyn Fn((&mut i32,&mut i32))>>,
+}
+
+
+impl WayPoint{
+    
+    fn new() -> Self{
+        Self {
+            x : 10,
+            y : 1,
+            DIRS : vec![NORTH,EAST,SOUTH,WEST],
+            magic :  vec![
+              //  Box::new(move |(x, y)| (y, x)),
+              //  Box::new(move |(x, y)| (1 - y, 1 - x)),
+            ],
+        }
+    }
+
+    fn move_waypoint(&mut self, val : i32, dir : usize) {
+        self.x += self.DIRS[dir].x * val;
+        self.y += self.DIRS[dir].y * val;
+    }
+
+    fn do_stuff(&mut self, a : &Action){
+        match a.op {
+            'N' => self.move_waypoint(a.val,0),
+            'E' => self.move_waypoint(a.val,1),
+            'S' => self.move_waypoint(a.val,2),
+            'W' => self.move_waypoint(a.val,3),
+            'R' => {
+                let num = ((a.val/90) as usize) % 4;
+            },
+            'L' => {
+                let num = ((a.val/90) as usize) % 4;
+            },
+
+            _ => {
+                println!("error while parsing: {}", a.op); 
+                exit(-1);
+            },
+        }
+    }
+
+}
+
+
 
 fn main() {
     let mut ship = Ship::new();
