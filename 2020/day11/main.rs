@@ -3,6 +3,7 @@ use lib::io::*;
 use std::cmp::{min,max};
 use num::{ToPrimitive,Integer};
 use std::mem::swap;
+use std::convert::TryFrom;
 
 //use num::cast::AsPrimitive;
 
@@ -11,6 +12,7 @@ const OCCUPIED : char = '#';
 const FLOOR: char = '.';
 const EMPTY: char = 'L';
 
+#[derive(Debug)]
 pub struct Field<'a>{
     pub field : &'a mut Vec<Vec<char>>,
     pub new_field : &'a mut Vec<Vec<char>>,
@@ -31,7 +33,7 @@ impl <'a> Field<'a> {
             seat.y=y;
             for x in 0..self.field[y].len() {
                 seat.x=x;
-                let nbrs = seat.get_occupied_neighbours(&self.field);
+                let nbrs = seat.get_occupied_neighbours2(&self.field); //remove 2 for star1
                 self.new_field[y][x] = match self.field[y][x] {
                     EMPTY => {
                         if nbrs == 0 { 
@@ -42,7 +44,7 @@ impl <'a> Field<'a> {
                         }
                     },
                     OCCUPIED => {
-                        if nbrs > 3 {
+                        if nbrs > 4 { //>3 for star1
                             changed = true;
                             EMPTY
                         } else {
@@ -72,7 +74,7 @@ impl <'a> Field<'a> {
     
        
 }
-
+#[derive(Debug)]
 pub struct Direction {
     x : i8,
     y : i8,
@@ -87,13 +89,20 @@ impl Direction {
         }
     }
 }
-   
+#[derive(Debug)] 
 pub struct Seat<T> {
     pub x : T,
     pub y : T,
 }
 
-impl<T> Seat<T> {
+impl<T: Copy> Seat<T> {
+
+    fn copy ( other : &Seat<T>) -> Self {
+        Self {
+            x : other.x,
+            y : other.y,
+        }
+    }
 
     fn new ( x : T, y : T) -> Self {
         Self {
@@ -103,22 +112,48 @@ impl<T> Seat<T> {
     }
    }
 
-impl<T: Integer + ToPrimitive> Seat<T> {
+impl<T: Integer + ToPrimitive + TryFrom<i32> + Copy + std::fmt::Debug> Seat<T> {
+//this fuction sucks, wtf
     fn is_seat_in_dir(&self,  dir : &Direction, seat : &mut Seat<T>, seats : &Vec<Vec<char>>) -> bool{
         let x = seat.x.to_i32().unwrap() + dir.x as i32;
         let y = seat.y.to_i32().unwrap() + dir.y as i32;
-        if x < 0 || y < 0 || x >= seats[0].len() || y >= seats.len() {
+        if x < 0 || y < 0 || x as usize >= seats[0].len() || y as usize >= seats.len() {
             return false;
         }
+       //    print!("{:?} -> ", seat);
         match seats[y as usize][x as usize] {
             OCCUPIED => true,
             EMPTY => false,
             _ => {
-                seat.x = x;
-                seat.y = y;
-                is_seat_in_dir(dir,seat,seats)
+                match T::try_from(x) {
+                    Ok(x) => seat.x = x,
+                    _ => (), 
+                }
+                match T::try_from(y) {
+                    Ok(y) => seat.y = y,
+                    _ => (), 
+                }
+               // seat.x = T::try_from(x);  
+               // seat.y = T::try_from(y);
+               //println!("{:?}", seat);
+                self.is_seat_in_dir(dir,seat,seats)
             }
         }
+    }
+
+    fn get_occupied_neighbours2(&self, seats : &Vec<Vec<char>>) -> u8{
+        let mut occupied = 0;
+        for x in -1..2{
+            for y in -1..2 {
+                if x == 0 && y == 0 { continue; }
+                 let mut seat = Seat::<T>::copy(&self); 
+                 let dir = Direction::new(x,y);
+                 if self.is_seat_in_dir(&dir, &mut seat, seats){
+                    occupied +=1;
+                 }
+            }
+        }
+        occupied
     }
 
     fn get_occupied_neighbours(&self, seats : &Vec<Vec<char>>) -> u8{
