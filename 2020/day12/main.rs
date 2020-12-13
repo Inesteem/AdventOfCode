@@ -1,7 +1,7 @@
 extern crate lib;
 use lib::io::*;
 use std::process::exit;
-
+use std::mem::swap;
 
 const EAST :  Direction = Direction{x:1,y:0};
 const WEST :  Direction = Direction{x:-1,y:0};
@@ -93,15 +93,38 @@ impl Ship {
 struct Ship2 {
     x : i32,
     y : i32,
-    way_point: WayPoint,
+    waypoint: WayPoint,
 }
 struct WayPoint {
     x : i32,
     y : i32,
     DIRS : Vec<Direction>,
-    magic : Vec<Box<dyn Fn((&mut i32,&mut i32))>>,
+ //   magic : Vec<Box<dyn Fn((&mut i32,&mut i32))>>,
 }
 
+impl Ship2 {
+
+    fn move_ship(&mut self, val : i32, dir : usize) {
+        self.x += self.waypoint.DIRS[dir].x * val;
+        self.y += self.waypoint.DIRS[dir].y * val;
+    }
+
+    fn do_stuff(&mut self, a : &Action){
+        match a.op {
+            'F' => {
+                self.x += self.waypoint.x * a.val;
+                self.y += self.waypoint.y * a.val;
+            },
+            _ => self.waypoint.do_stuff(a),
+            
+        }
+    }
+
+    fn get_manhatten(&self) -> usize {
+        (i32::abs(self.x) + i32::abs(self.y)) as usize
+    }
+
+}
 
 impl WayPoint{
     
@@ -110,10 +133,10 @@ impl WayPoint{
             x : 10,
             y : 1,
             DIRS : vec![NORTH,EAST,SOUTH,WEST],
-            magic :  vec![
-              //  Box::new(move |(x, y)| (y, x)),
-              //  Box::new(move |(x, y)| (1 - y, 1 - x)),
-            ],
+           // magic :  vec![
+           //   //  Box::new(move |(x, y)| (y, x)),
+           //     Box::new(|(x, y)| (1 - y, 1 - x)),
+           // ],
         }
     }
 
@@ -130,9 +153,17 @@ impl WayPoint{
             'W' => self.move_waypoint(a.val,3),
             'R' => {
                 let num = ((a.val/90) as usize) % 4;
+                for _ in 0..num {
+                    self.x *= -1;
+                    swap(&mut self.x,&mut self.y);
+                }
             },
             'L' => {
-                let num = ((a.val/90) as usize) % 4;
+                 let num = ((a.val/90) as usize) % 4;
+                 for _ in 0..num {
+                    self.y *= -1;
+                    swap(&mut self.x,&mut self.y);
+                 }
             },
 
             _ => {
@@ -148,14 +179,17 @@ impl WayPoint{
 
 fn main() {
     let mut ship = Ship::new();
+    let mut ship2 = Ship2{x : 0, y : 0, waypoint : WayPoint::new()};
     loop {
         let line = read_line_from_stdin().unwrap();
         if line.len() == 0 { break; }
 
         let a = Action::new(&line[0..line.len()-1]);
         ship.do_stuff(&a);
+        ship2.do_stuff(&a);
         //println!("{:?}", a);
         //println!("{:?}\n", ship);
     }
     println!("star1 {}", ship.get_manhatten());
+    println!("star2 {}", ship2.get_manhatten());
 }
