@@ -69,8 +69,25 @@ impl <'a> Field<'a> {
         }
         occupied
     }
+    
+       
 }
 
+pub struct Direction {
+    x : i8,
+    y : i8,
+}
+
+impl Direction {
+
+    fn new ( x : i8, y : i8) -> Self {
+        Self {
+            x : x,
+            y : y,
+        }
+    }
+}
+   
 pub struct Seat<T> {
     pub x : T,
     pub y : T,
@@ -84,9 +101,25 @@ impl<T> Seat<T> {
             y : y,
         }
     }
-}
+   }
 
 impl<T: Integer + ToPrimitive> Seat<T> {
+    fn is_seat_in_dir(&self,  dir : &Direction, seat : &mut Seat<T>, seats : &Vec<Vec<char>>) -> bool{
+        let x = seat.x.to_i32().unwrap() + dir.x as i32;
+        let y = seat.y.to_i32().unwrap() + dir.y as i32;
+        if x < 0 || y < 0 || x >= seats[0].len() || y >= seats.len() {
+            return false;
+        }
+        match seats[y as usize][x as usize] {
+            OCCUPIED => true,
+            EMPTY => false,
+            _ => {
+                seat.x = x;
+                seat.y = y;
+                is_seat_in_dir(dir,seat,seats)
+            }
+        }
+    }
 
     fn get_occupied_neighbours(&self, seats : &Vec<Vec<char>>) -> u8{
         let mut occupied : u8 = 0;
