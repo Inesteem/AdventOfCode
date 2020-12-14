@@ -12,6 +12,18 @@ pub fn read_line_from_stdin() -> std::io::Result<String> {
     Ok(buffer)
 }
 
+
+pub fn read_all_from_stdin() -> String {
+    let mut ret: String = read_line_from_stdin().unwrap();
+    
+    loop {
+        let line = read_line_from_stdin().unwrap();
+        if line.len() == 0 { break; }
+        ret.push_str(&line);
+    }
+    ret
+}
+
 pub fn read_str_from_file(filename : String) -> std::io::Result<String> {
     let file = File::open(filename)?;
     let mut buf_reader = BufReader::new(file);
