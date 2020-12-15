@@ -13,7 +13,8 @@ fn main() {
     }
     let mut last_num = start_sequence[start_sequence.len()-1];
 
-    while i < 2019 {
+    while i < 30000000-1 {
+    //while i < 2019 {
         //for n in &numbers { print!("{:?}", n);}
         //println!("{} {}",i + 1, last_num);
         if numbers.contains_key(&last_num) {
@@ -30,5 +31,5 @@ fn main() {
         }
         i += 1;
     }
-    println!("star1: {}",last_num);
+    println!("star2: {}",last_num);
 }
