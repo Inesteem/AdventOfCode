@@ -1,6 +1,5 @@
 extern crate lib;
 use lib::io::*;
-use std::cmp::{min,max};
 
 fn main() {
     
