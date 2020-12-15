@@ -1,0 +1,16 @@
+[package]
+name = "day7"
+version = "0.1.0"
+authors = ["lucifer <lucifer.hemp@fau.de>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+lib={path="../../../2020/lib/"}
+nix = "0.19.1"
+permutohedron = "0.2.4"
+
+[[bin]]
+name = "day7"
+path = "main.rs"

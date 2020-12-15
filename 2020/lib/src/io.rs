@@ -35,5 +35,17 @@ pub fn read_str_from_file(filename : String) -> std::io::Result<String> {
 }
 
 
+pub fn read_in_int() -> i32 {
+    let mut input_text = String::new();
+    io::stdin()
+        .read_line(&mut input_text)
+        .expect("failed to read from stdin");
 
+    let trimmed = input_text.trim();
+    match trimmed.parse::<i32>() {
+        Ok(i) => return i,
+        Err(..) => println!("this was not an integer: {}", trimmed),
+    };
+    return -1
+}
 
