@@ -10,7 +10,7 @@ fn main() {
     
     let num_layers = line.len() / (w * h);
 
-    //let mut digits : Vec<Vec<Vec<u8>>> = vec![vec![vec![0;w];h];num_layers];
+    let mut image: Vec<Vec<u8>> = vec![vec![2;w];h];
     let mut digits : Vec<Vec<u8>> = vec![vec![0;3];num_layers];
 
     assert!(num_layers * w * h == line.len());
@@ -21,14 +21,32 @@ fn main() {
             for col in 0..w {
                 //digits[layer][row][col] = (line[i] as u8) - ('0' as u8);
                 let d = (line[i] as u8) - ('0' as u8);
-                i += 1;
+                //star1
                 if d <= 2 {
                     digits[layer][d as usize] += 1; 
                 }
+                //star2
+                if image[row][col] == 2 {
+                    image[row][col] = d;
+                }
+                i += 1;
             }
         }
     }
     digits.sort_by(|a, b| a[0].cmp(&b[0]));
     println!("{:?}", digits); 
     println!("star1: {}", (digits[0][1] as u16)  * (digits[0][2] as u16) );
+    
+    println!("");
+    for row in &image {
+        for col in row {
+            if *col == 1 {
+                print!("{}", '#');
+            } else {
+                print!("{}", '-');
+            }
+        } 
+        println!("");
+    }
+
 }
