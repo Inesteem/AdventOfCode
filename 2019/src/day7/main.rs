@@ -10,17 +10,66 @@ use nix::unistd::*;
 use std::os::unix::io::{RawFd,AsRawFd,FromRawFd};
 use permutohedron::heap_recursive;
 
-fn do_calc(mut write_file : &mut File, reader : &mut BufReader<File>, sequence : &Vec<&str>) -> i32 {
+
+struct UglyPipe{
+    parent_r : i32,
+    parent_w : i32,
+    child_r : i32,
+    child_w : i32,
+}
+impl UglyPipe {
+
+    fn new() -> Self {
+        let (parent_r,child_w) = pipe().unwrap();
+        let (child_r, parent_w) = pipe().unwrap();
+        Self {
+            parent_r : parent_r,
+            parent_w : parent_w,
+            child_r  : child_r ,
+            child_w  : child_w ,
+        }
+    }
+
+    fn close_childs(&mut self){
+       close(self.child_r).unwrap(); 
+       close(self.child_w).unwrap(); 
+ }
+    fn close_parents(&mut self){
+       close(self.parent_r).unwrap(); 
+       close(self.parent_w).unwrap(); 
+    } 
+
+    fn dup_childs(&mut self) {
+        close(nix::libc::STDIN_FILENO).unwrap();
+        close(nix::libc::STDERR_FILENO).unwrap();
+        dup2(self.child_r, nix::libc::STDIN_FILENO).unwrap();
+        dup2(self.child_w, nix::libc::STDOUT_FILENO).unwrap();
+
+    }
+}
+
+fn do_calc(write_files : &mut Vec<File>, readers : &mut Vec<BufReader<File>>, sequence : &Vec<i32>) -> i32 {
     let mut last = 0;
     let mut line = String::new();
+    println!("s: {:?}", sequence); 
     for i in 0..5 {
-        //write!(&mut write_file, "1\n");
-        write!(&mut write_file, "{}", &sequence[i]);
-        write!(&mut write_file, "{}\n", last);
+        write!(&mut write_files[i], "{}\n", &sequence[i]).unwrap();
+    }
 
-        reader.read_line(&mut line).expect("Unable to read line");
-        last = line[..line.len()-1].parse::<i32>().unwrap();
-        line.clear();
+    let mut fin = false;
+    while !fin {
+        for i in 0..5 {
+            write!(&mut write_files[i], "{}\n", last).unwrap();
+            readers[i].read_line(&mut line).expect("Unable to read line");
+            println!("line{}: >{}< ({})",i,line.trim(),last);
+            if line.len() == 0  || line.eq("fin\n") {
+                fin = true;
+                line.clear();
+                continue;
+            }
+            last = line[..line.len()-1].parse::<i32>().unwrap();
+            line.clear();
+        }
     }
     last
 }
@@ -43,52 +92,66 @@ fn main() {
             .collect();
     unsafe {
 
-
-        let (parent_r,child_w) = pipe().unwrap();
-        let (child_r, parent_w) = pipe().unwrap();
+        let mut pipes = vec![];
+        for i in 0..5 {
+            pipes.push(UglyPipe::new());
+        }
         match fork() {
             Ok(ForkResult::Parent { child, .. }) => {
-                
-                close(child_r).unwrap();
-                close(child_w).unwrap();
-
-                let mut write_file =  File::from_raw_fd(parent_w);
-                let mut reader = BufReader::new( File::from_raw_fd(parent_r));
-                 
-                let mut sequence = vec!["0\n","1\n","2\n","3\n","4\n"];
+                let mut write_files = vec![];
+                let mut readers= vec![];
+                for p in &mut pipes { 
+                    p.close_childs();  
+                    write_files.push(File::from_raw_fd(p.parent_w));
+                    readers.push(BufReader::new(File::from_raw_fd(p.parent_r)));
+                } 
+                //let mut sequence = vec![0,1,2,3,4];
+                let mut sequence = vec![5,6,7,8,9];
                 let mut permutations = Vec::new();
                 heap_recursive(&mut sequence, |permutation| {
                     permutations.push(permutation.to_vec())
                  });
                 let mut largest = 0;
                 for s in permutations {
-                    let value = do_calc(&mut write_file, &mut reader, &s);
-                    println!("{}", value);
+                    //let s = vec![9, 8, 7, 6, 5];
+                    //let s = vec![7,5,6,8,9];
+                    let value = do_calc(&mut write_files, &mut readers, &s);
+                    println!("val: {}", value);
                     largest = std::cmp::max(largest,value);
                 }
-                println!("star1: {}",largest);
-                close(parent_r).unwrap();
-                close(parent_w).unwrap();
+                println!("star2: {}",largest);
           
             }
             Ok(ForkResult::Child) => {
-                close(parent_r).unwrap();
-                close(parent_w).unwrap();
-                close(nix::libc::STDIN_FILENO);
-                close(nix::libc::STDERR_FILENO);
+                for p in &mut pipes { p.close_parents(); } 
+                for ip in 0..pipes.len(){
 
-                dup2(child_r, nix::libc::STDIN_FILENO);
-                dup2(child_w, nix::libc::STDOUT_FILENO);
-                
-                loop {
-                    let mut pc = IntComp::new(&mut program, &ops);
-                    pc.run();
-                    io::stdout().flush().unwrap(); 
+                    match fork() {
+                    Ok(ForkResult::Parent { child, .. }) => {
+                    },
+                    Ok(ForkResult::Child) => {
+                       // for j in 0..5 {
+                       //     if i == j {continue;}
+                       //     pipes[j].close_childs();
+                       // }
+                        pipes[ip].dup_childs();                        
+                        loop {
+                            let mut pc = IntComp::new(&mut program, &ops);
+                             pc.run();
+                            println!("fin");
+                            read_in_int();
+                            io::stdout().flush().unwrap(); 
+                        }
+                        println!("err");
+                    },
+                    Err(_) => println!("Fork failed"),
+                    }
                 }
-                close(child_r).unwrap();
-                close(child_w).unwrap();
+                    //close(child_r).unwrap();
+                //close(child_w).unwrap();
             },
             Err(_) => println!("Fork failed"),
         }
     }
 }
+//too high : 263462987
