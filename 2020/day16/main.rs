@@ -48,8 +48,6 @@ fn remove_from(needle : &str, haystack : &mut Vec<Vec<&str>>){
     for l in haystack {
         if l.len() <= 1 { continue; }
         l.retain(|&x| !x.eq(needle));
-        //let index = l.iter().position(|x| (*x).eq(needle)).unwrap();
-        //l.remove(index);
     }
 }
 
@@ -61,18 +59,15 @@ fn star2(list : &mut Vec<Vec<String>>){
     let mut yt_idx = 0;
     while !list[yt_idx][0].eq("-") {
         fields.push(Field::new(&list[yt_idx]));
-        println!("{:?}\n", fields[fields.len()-1]);
         yt_idx += 1;
     }
 
     yt_idx += 2;
 
-    println!("{} / {}",yt_idx,list.len());
     let mut possible_fields : Vec<Vec<&str>> = vec![];
     
     for col in 0..fields.len() {
         possible_fields.push(Vec::new());
-        println!("");
         for f in 0..fields.len(){
 
             let mut valid = true;
@@ -80,21 +75,16 @@ fn star2(list : &mut Vec<Vec<String>>){
             
             for row in yt_idx..list.len() {
                 if !field.in_range(list[row][col].parse::<usize>().expect("not a number")) {
-                  //  println!("{} not in range for {}", list[row][col], field.name);
                     valid = false;
                     break;
-                } else {
-                //    println!("{} in range for {}", list[row][col], field.name);
-                }
+                } 
             }
             if valid {
                 possible_fields[col].push(&field.name[..]);
             }
         }
-        //println!("{:?}",possible_fields[col]);
     }
 
-        println!("---");
 
     for _i in 0..100 {
         for i in 0..possible_fields.len() {
@@ -104,15 +94,10 @@ fn star2(list : &mut Vec<Vec<String>>){
         }
     }
 
-    for f in 0..possible_fields.len() {
-        println!("{:?}", possible_fields[f]);
-    }
     let mut mul = 1;
     for f in 0..possible_fields.len() {
         if possible_fields[f][0].len() >= "departure".len() &&  possible_fields[f][0][0.."departure".len()].eq("departure") {
-            println!("{} {}", f,possible_fields[f][0]);
             mul *= list[yt_idx-1][f].parse::<usize>().unwrap();
-            println!("{}",list[yt_idx-1][f].parse::<usize>().unwrap());
         }
 
     }
@@ -121,7 +106,6 @@ fn star2(list : &mut Vec<Vec<String>>){
 
 fn add_range(l : &str,ranges : &mut Vec<bool>) {
     let intervals : Vec<&str> = l.split('-').collect();
-    println!("{:?}",intervals);
     let start = intervals[0].parse::<usize>().unwrap();
     let end = intervals[1].parse::<usize>().unwrap();
     if ranges.len() <= end {
@@ -138,13 +122,10 @@ fn star1()-> Vec<Vec<String>>{
     let mut list = vec![];
     loop {
         line = read_line_from_stdin().unwrap().trim().to_string();
-        println!("{}",line);
         if line.len() == 0 { continue; }
         if line.eq("your ticket:") { break; }
         let split1: Vec<&str> = line.split(':').collect();
         let split2: Vec<&str> = split1[1].split(' ').collect();
-        println!("- {:?}", split1);
-        println!("- {:?}", split2);
         add_range(split2[1], &mut ranges);
         add_range(split2[3], &mut ranges);
         list.push(vec![split1[0].to_string(), split2[1].to_string(), split2[3].to_string()]);
@@ -153,7 +134,6 @@ fn star1()-> Vec<Vec<String>>{
 
     loop {
         line = read_line_from_stdin().unwrap().trim().to_string();
-        println!("{}",line);
         if line.len() == 0 { continue; }
         if line.eq("nearby tickets:") { break; }
         let split: Vec<String> = line.split(',').map(|x| x.to_string()).collect();
@@ -163,7 +143,6 @@ fn star1()-> Vec<Vec<String>>{
     let mut sum = 0;
     loop {
         line = read_line_from_stdin().unwrap().trim().to_string();
-        println!("{}",line);
         if line.len() == 0 {break; }
         let splitted : Vec<usize> = line.split(',').map(|x| x.parse().unwrap()).collect();
         let mut sane = true;
@@ -174,13 +153,11 @@ fn star1()-> Vec<Vec<String>>{
         list.push(line.split(',').map(|x| x.to_string()).collect());
         }
     }
-    //println!("{:?}", ranges);
     println!("star1: {}", sum);
     list
 }
 
 fn main() {
     let mut list = star1();
-    println!("{:?}\n\n", list);
     star2(&mut list);
 }
