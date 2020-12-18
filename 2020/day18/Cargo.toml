@@ -1,0 +1,15 @@
+[package]
+name = "day18"
+version = "0.1.0"
+authors = ["Lucifer Hemp <lucifer.hemp@fau.de>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+lib={path="../lib/"}
+
+
+[[bin]]
+name = "day18"
+path = "main.rs"
