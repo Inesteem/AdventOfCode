@@ -28,6 +28,14 @@ fn print_vec3d(vec : &Vec<Vec<Vec<u8>>>) {
 
 }
 
+struct Point4D {
+    w : usize,
+    d : usize,
+    r : usize,
+    c : usize,
+}
+
+
 struct Point3D {
     d : usize,
     r : usize,
@@ -35,26 +43,29 @@ struct Point3D {
 }
 
 struct Grid{
-    grid : Vec<Vec<Vec<u8>>>,
+    //grid : Vec<Vec<Vec<u8>>>,
+    grid : Vec<Vec<Vec<Vec<u8>>>>,
 }
 
 impl Grid {
 
-    fn active_neighbours(&self, point : &Point3D) -> u8 {
+    fn active_neighbours(&self, point : &Point4D) -> u8 {
 
         let mut num = 0;
-        for depth in point.d-1..=point.d+1 {
-            for row in point.r-1..=point.r+1 {
-                for col in point.c-1..=point.c+1 {
-                    match self.grid[depth][row][col] {
-                        ACTIVE => num += 1,
-                        DYING => num += 1,
-                        _ => (),
+        for w in point.w-1..=point.w+1 {
+            for depth in point.d-1..=point.d+1 {
+                for row in point.r-1..=point.r+1 {
+                    for col in point.c-1..=point.c+1 {
+                        match self.grid[w][depth][row][col] {
+                            ACTIVE => num += 1,
+                            DYING => num += 1,
+                            _ => (),
+                        }
                     }
                 }
             }
         }
-        if self.grid[point.d][point.r][point.c] == ACTIVE {
+        if self.grid[point.w][point.d][point.r][point.c] == ACTIVE {
             num -=1;
         }
         num 
@@ -62,26 +73,29 @@ impl Grid {
 
     fn update(&mut self) {
         let mut updates = vec![];
-        for depth in 1..self.grid.len()-1{
-            for row in 1..self.grid[0].len()-1 {
-                for col in 1..self.grid[0][0].len()-1 {
-                    let pos = Point3D{d:depth,r:row,c:col};
-                    let an = self.active_neighbours(&pos);                   
-                    let cube = &mut self.grid[depth][row][col];
-                    if *cube == ACTIVE && !(an == 2 || an == 3) {
-                        *cube = DYING;
-                        updates.push(pos);
-                    } else if *cube == INACTIVE && an == 3 {
-                        *cube = STARTING;
-                        updates.push(pos);
-                    }
-                    
+        for w in 1..self.grid.len()-1{
+            for depth in 1..self.grid[0].len()-1{
+                for row in 1..self.grid[0][0].len()-1 {
+                    for col in 1..self.grid[0][0][0].len()-1 {
+                       // let pos = Point3D{d:depth,r:row,c:col};
+                        let pos = Point4D{w:w,d:depth,r:row,c:col};
+                        let an = self.active_neighbours(&pos);                   
+                        let cube = &mut self.grid[w][depth][row][col];
+                        if *cube == ACTIVE && !(an == 2 || an == 3) {
+                            *cube = DYING;
+                            updates.push(pos);
+                        } else if *cube == INACTIVE && an == 3 {
+                            *cube = STARTING;
+                            updates.push(pos);
+                        }
 
+
+                    }
                 }
-            }
-        }               
+            }    
+        }
         for pos in updates {
-            let cube = &mut self.grid[pos.d][pos.r][pos.c];
+            let cube = &mut self.grid[pos.w][pos.d][pos.r][pos.c];
             if *cube == DYING { *cube = INACTIVE; }
             else if *cube == STARTING{ *cube = ACTIVE;}
             else { assert!(false); }
@@ -91,11 +105,13 @@ impl Grid {
 
     fn num_active(&self) -> usize {
         let mut num = 0;
-        for depth in 1..self.grid.len()-1{
-            for row in 1..self.grid[0].len()-1 {
-                for col in 1..self.grid[0][0].len()-1 {
-                    let cube = & self.grid[depth][row][col];
-                    if *cube == ACTIVE { num += 1; } 
+        for w in 1..self.grid.len()-1{
+            for depth in 1..self.grid[0].len()-1{
+                for row in 1..self.grid[0][0].len()-1 {
+                    for col in 1..self.grid[0][0][0].len()-1 {
+                        let cube = & self.grid[w][depth][row][col];
+                        if *cube == ACTIVE { num += 1; } 
+                    }
                 }
             }
         }
@@ -117,11 +133,11 @@ fn main() {
     let rows = input.len(); 
     let cols = input[0].len(); 
     let depth = 2*CYCLES + 1;
-    let mut grid = vec![vec![vec![INACTIVE;cols + 2*CYCLES];rows + 2*CYCLES];depth];
+    let mut grid = vec![vec![vec![vec![INACTIVE;cols + 2*CYCLES];rows + 2*CYCLES];depth];depth];
 
     for row in CYCLES..CYCLES+rows {            
         for col in CYCLES..CYCLES+cols { 
-            grid[CYCLES][row][col] = match input[row-CYCLES][col-CYCLES] {
+            grid[CYCLES][CYCLES][row][col] = match input[row-CYCLES][col-CYCLES] {
                 '#' => ACTIVE,
                 _ => INACTIVE,
     
