@@ -105,31 +105,21 @@ impl Tile {
         sim_right
     }
 
-    fn check_similar(&mut self, other : &mut Tile, c : char) -> i32 {
-
-        let mut num = 0;
+    fn check_similar(&mut self, other : &mut Tile) -> char{
+        
         if(self.check_similar_top(other))  {
-
-//            println!("top {}", other.id);
-            num += 1;
+           return 't';
         }
-        if(self.check_similar_bottom(other))  {
-//            println!("bottom {}", other.id);
-           num += 1;
+        else if(self.check_similar_bottom(other))  {
+           return 'b';
         }
-        if(self.check_similar_left(other))  {
-//            println!("left {}", other.id);
-           num += 1;
+        else if(self.check_similar_left(other))  {
+           return 'l';
         }
-        if(self.check_similar_right(other)) {
-//            println!("right {}", other.id);
-            num += 1;
+        else if(self.check_similar_right(other)) {
+           return 'r';
         }
-        if num > 0 {
-            self.similars.push(Similar{id : other.id, side : '-', direct : true});
-            other.similars.push(Similar{id : self.id, side : '-', direct : true});
-        }
-        num
+        '-' 
     }
 //        if sim_top {
 //            self.similars.push(Similar{id : other.id, side : 't', direct : true});
@@ -162,29 +152,44 @@ fn main () {
         unsafe{
             let pa: *mut  Tile = &mut tiles[i];
             for j in i+1..tiles.len() {
-                let mut num = 0;
+                let mut c = '-';
                 for k in 0..4 {
                     tiles[i].rotate();
                     //  tiles[i].print();
-                    num += (*pa).check_similar(&mut tiles[j],'c');
+                    c = (*pa).check_similar(&mut tiles[j]);
+                    if c != '-' { break; }
                     tiles[i].h_flip(); 
-                    num += (*pa).check_similar(&mut tiles[j],'c');
+                    c = (*pa).check_similar(&mut tiles[j]);
+                    if c != '-' { break; }
                     tiles[i].h_flip(); 
                     tiles[i].v_flip(); 
-                    num += (*pa).check_similar(&mut tiles[j],'c');
+                    c = (*pa).check_similar(&mut tiles[j]);
+                    if c != '-' { break; }
                     tiles[i].v_flip(); 
-                    if num > 0 { break; }
                 }
+                if c != '-' {            
+                    (*pa).similars.push(Similar{id : tiles[j].id, side : c, direct : true});
+                    let pb: *mut  Tile = &mut tiles[j];
+                    (*pb).similars.push(Similar{id : tiles[i].id, side : c, direct : true});
+                }
+
 
             }
             //    println!("{}: {}", tiles[i].id, num);
         }
         //tiles[i].print();
-        if tiles[i].similars.len() == 2 {
             println!("{} {}", tiles[i].id, tiles[i].similars.len());
             println!("");
+        if tiles[i].similars.len() == 2 {
             mul *= tiles[i].id as u64 ;
         }
     }   
     println!("star1: {}", mul);
+
+    let grid_size =  (tiles.len() as f64).sqrt() as usize; 
+
+
+    
+
+
 }
