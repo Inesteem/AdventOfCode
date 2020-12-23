@@ -83,7 +83,7 @@ fn main () {
         if ret.contains(&(line.len()-1)) {
             sum += 1;
         }
-        println!("{} {:?} {}",  line.trim(), ret, line.len() -1);
+        //println!("{} {:?} {}",  line.trim(), ret, line.len() -1);
     } 
     println!("star2 : {} ", sum);
 
