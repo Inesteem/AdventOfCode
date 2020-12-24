@@ -57,11 +57,11 @@ struct Tile {
 
 impl Tile {
     fn copy_into(&self, image : &mut Vec<Vec<char>>, start_r : usize, start_c : usize) {
-         for row in 0..self.field.len()-2 {
-            for col in 0..self.field[row].len()-2 {
+         for row in 0..self.field.len() {
+            for col in 0..self.field[row].len() {
                 assert!(image.len() > start_r + row);
                 assert!(image[0].len() > start_c + col);
-                image[start_r + row][start_c + col] = self.field[row+1][col+1];
+                image[start_r + row][start_c + col] = self.field[row][col];
             }
         }
   
@@ -286,12 +286,12 @@ fn main () {
     //fill image
     let grid_size =  (tiles.len() as f64).sqrt() as usize; 
 
-    let mut image = vec![vec!['-'; (tiles[0].field[0].len()-2) * grid_size]; (tiles[0].field.len()-2)*grid_size];
+    let diff = tiles[0].field.len();//-2;
+    let mut image = vec![vec!['-'; diff  * grid_size]; diff*grid_size];
     
     let mut left = top_left;
     let mut right= top_left;
     let mut start_r = 0;
-    let diff = tiles[0].field.len()-2;
     for r in 0..grid_size {
         let mut start_c = 0;
         for c in 0..grid_size {
