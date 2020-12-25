@@ -1,5 +1,6 @@
 use lib::io::*;
 use std::collections::VecDeque;
+use std::collections::HashSet;
 
 #[derive(Debug)]
 struct Player {
@@ -8,6 +9,44 @@ struct Player {
 
 impl Player {
 
+    fn play_rec(&mut self, other : &mut Player, set : &mut HashSet<String>) -> i8 {
+        //infinite loops prevention
+        let mut key = self.to_str();
+//        println!("{}", &key);
+        key.push_str("-");
+        key.push_str(&other.to_str());
+        if set.contains(&key) { 
+          return 1;   
+        }
+        set.insert(key);
+
+        if self.cards.len() == 0 { return -1; }
+        if other.cards.len() == 0 { return 1; }
+        let own = self.cards.pop_front().unwrap();
+        let his = other.cards.pop_front().unwrap();
+        let mut larger = if own > his {1} else {-1};
+
+        if own <= self.cards.len() && his <= other.cards.len() {
+            let mut p0 = Player{cards : VecDeque::new()};
+            for i in 0..own {p0.cards.push_back(self.cards[i]);}
+
+            let mut p1 = Player{cards : VecDeque::new()};
+            for i in 0..his {p1.cards.push_back(other.cards[i]);}
+            
+            larger = p0.round_rec(&mut p1);
+
+        }
+
+        if larger == 1 {
+            self.cards.push_back(own);
+            self.cards.push_back(his);
+        } else {
+            other.cards.push_back(his);
+            other.cards.push_back(own);
+        }
+
+        0       
+    }
     fn play(&mut self, other : &mut Player) -> i8{
         if self.cards.len() == 0 { return -1; }
         if other.cards.len() == 0 { return 1; }
@@ -35,6 +74,38 @@ impl Player {
 
     }
 
+    fn to_str(&self) -> String{
+        let mut s = String::new();
+        for i in 0..self.cards.len() {
+            s.push_str(&self.cards[i].to_string());
+            s.push_str(".");
+        }
+        s
+    }
+
+    fn round_rec(&mut self, other: &mut Self) -> i8 {
+        let mut set = HashSet::new();
+
+        let mut ret = 0;
+        while ret == 0 {
+            ret = self.play_rec(other, &mut set); 
+        }
+
+        ret 
+    }
+
+
+    fn round(&mut self, other: &mut Self) -> usize {
+        let mut ret = 0;
+        while ret == 0 {
+            ret = self.play(other); 
+        }
+        if ret == 1 {
+            return self.cnt();
+        }
+        other.cnt()
+    }
+
 }
 
 fn main() {
@@ -55,13 +126,12 @@ fn main() {
     }
     let mut p1 = p.remove(1);
     let mut p0 = p.remove(0);
-    let mut ret = 0;
-    while ret == 0 {
-        ret = p0.play(&mut p1); 
-    }
-    if ret == 1 {
-        println!("star1: {}", p0.cnt());
-    } else {
-        println!("star1: {}", p1.cnt());
-    }
+    //println!("star1: {}", p0.round(&mut p1));
+    
+
+    println!("star2: {}", match p0.round_rec(&mut p1){
+        -1 => p1.cnt(),
+        _ => p0.cnt(),
+
+    });
 }
