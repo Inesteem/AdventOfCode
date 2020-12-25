@@ -3,11 +3,19 @@
 
 use lib::io::*;
 use std::collections::HashMap;
+use std::io::Write;
+use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
+
 
 fn print_vec2D(v : &Vec<Vec<char>>) {
     for row in 0..v.len() {
         for col in 0..v[row].len() {
+   //         let mut stdout = StandardStream::stdout(ColorChoice::Always);
+ //           if row % 10 == 0 || row % 10 == 9 || col % 10 == 0 || col % 10 == 9{
+             //   stdout.set_color(ColorSpec::new().set_fg(Some(Color::Green))).unwrap();
+          //   }
             print!("{}", v[row][col]);
+         //   stdout.set_color(ColorSpec::new().set_fg(Some(Color::White))).unwrap();
         }
         println!("");
     }
@@ -57,14 +65,14 @@ struct Tile {
 
 impl Tile {
     fn copy_into(&self, image : &mut Vec<Vec<char>>, start_r : usize, start_c : usize) {
-         for row in 0..self.field.len() {
-            for col in 0..self.field[row].len() {
+        for row in 0..self.field.len()-2 {
+            for col in 0..self.field[row].len()-2 {
                 assert!(image.len() > start_r + row);
                 assert!(image[0].len() > start_c + col);
-                image[start_r + row][start_c + col] = self.field[row][col];
+                image[start_r + row][start_c + col] = self.field[row+1][col+1];
             }
         }
-  
+
     }
 
     fn print(&self) {
@@ -277,24 +285,27 @@ fn main () {
                     pos.push(c);
                 } else { assert!(false); }
             }
-            if pos.eq("tl") || pos.eq("lt") {
+            if pos.eq("rb") || pos.eq("br") {
                 top_left = i;
+                println!("top_left {} ", i);
             }
+            println!("{}", pos);
         }
     }
 
     //fill image
     let grid_size =  (tiles.len() as f64).sqrt() as usize; 
 
-    let diff = tiles[0].field.len();//-2;
+    let diff = tiles[0].field.len()-2;
     let mut image = vec![vec!['-'; diff  * grid_size]; diff*grid_size];
     
     let mut left = top_left;
-    let mut right= top_left;
     let mut start_r = 0;
     for r in 0..grid_size {
+        let mut right = left;
         let mut start_c = 0;
         for c in 0..grid_size {
+            print!("{} ",  tiles[right].id);
             tiles[right].copy_into(&mut image, start_r, start_c);
             start_c += diff;
             for sim in &mut tiles[right].similars {
@@ -302,29 +313,31 @@ fn main () {
                 else if sim.side == 'b' && c == 0 { left = *idx_map.get(&sim.id).unwrap(); }
             }
         }
+        println!("");
         start_r += diff;
-    }
-
+    }   
     println!("");
     let mut image_tile = Tile{id : 0, similars : vec![], field : image};
-    
+    image_tile.print();    
     let sea_monster : Vec<Vec<char>>= read_str_from_file("./sea_monster".to_string()).unwrap().split('\n').map(|x| x.to_string().chars().collect()).collect();
     let test_image: Vec<Vec<char>>= read_str_from_file("./test_image".to_string()).unwrap().split('\n').map(|x| x.to_string().chars().collect()).collect();
 
 
-
+    let mut num = 0;
     for k in 0..4 {
         //  tiles[i].print();
-        println!("{}", find_in(&image_tile.field, &sea_monster));
+        num = find_in(&image_tile.field, &sea_monster);
+        if num != 0 { break; }
         image_tile.h_flip(); 
-        println!("{}", find_in(&image_tile.field, &sea_monster));
+        num = find_in(&image_tile.field, &sea_monster);
+        if num != 0 { break; }
         image_tile.h_flip(); 
         image_tile.v_flip(); 
-        println!("{}", find_in(&image_tile.field, &sea_monster));
+        num = find_in(&image_tile.field, &sea_monster);
+        if num != 0 { break; }
         image_tile.v_flip(); 
         image_tile.rotate();
     }
-
-//    let num = find_in(&test_image, &sea_monster);
-//    println!("star2: {}", count(&test_image, '#') - num * count(&sea_monster,'#'));
+    
+    println!("star2: {}", count(&image_tile.field, '#') - num * count(&sea_monster,'#'));
 }
