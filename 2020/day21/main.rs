@@ -10,7 +10,6 @@ fn main() {
     loop {
         lines.push(read_line_from_stdin().unwrap());
         if lines[lines.len()-1].len() == 0 { break; }
-        print!("{}", lines[lines.len()-1]);
     }
 
     //map ingredient vec to allergene
@@ -32,7 +31,6 @@ fn main() {
         }
 
         let allergenes : Vec<&str> = s[1][0..s[1].len()-2].split(", ").collect();
-        println!("{:?} -> {:?}", ingredients, allergenes);
         for a in &allergenes {
             if !map.contains_key(&a[..]) {
                 map.insert(a.to_string(), ingredients.clone()); 
@@ -45,7 +43,6 @@ fn main() {
                     if ingredients.contains(&ingr[j]) {
                         j += 1; 
                     } else {
-                        println!("ingredient {} not important for allergene {}", &ingr[j], &a);  
                         ingr.remove(j);
                     }
 
@@ -59,7 +56,6 @@ fn main() {
     let mut to_remove : Vec<&str>= vec![]; 
     loop {
         let mut finished = true;
-        let mut progress = 0;
         for ingr in map.values_mut() {
             let l = ingr.len();
             assert!(l > 0);
@@ -68,27 +64,18 @@ fn main() {
                 for item in &to_remove {
                     ingr.retain(|e| !e.eq(item));
                 }
-                if ingr.len() != l { progress += 1; }
             }
             if ingr.len() == 1 && !to_remove.contains(&ingr[0]){
                 to_remove.push(ingr[0]);    
-                progress += 1;
             }
         }
-        println!(""); 
         if finished { break; }
-        if progress == 0 {
-          println!("no more progress");
-          break;
-        }
     }    
 
     //
     println!("{:?}", map);
-    println!("{:?}", &all_ingr);
 
     let allergic_ingredients : Vec<&str>= map.values().map(|x| x[0]).collect();
-    println!("{:?}", allergic_ingredients);
     let mut star1 = 0;
     for i in all_ingr.keys(){
         if !allergic_ingredients.contains(&&i[..]) {
@@ -96,4 +83,14 @@ fn main() {
         }
     }
     println!("star1: {}", star1);
+
+
+    let mut keys : Vec<_>= map.into_iter().collect();
+    keys.sort_by(|x,y| x.0.cmp(&y.0));
+    print!("star2: ");
+
+    for c in keys {
+        print!("{},", c.1[0]);
+    }
+    print!("{} \n",8u8 as char);
 }
