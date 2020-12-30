@@ -16,3 +16,29 @@ fn main() {
 
     let condition = true;
     let number = if condition { 5 } else { 6 };
+
+
+
+unimplemented!() macro
+
+
+
+pub fn push(&mut self, elem: i32) {
+    let new_node = Box::new(Node {
+        elem: elem,
+        next: mem::replace(&mut self.head, Link::Empty),
+    });
+
+    self.head = Link::More(new_node);
+}
+
+
+// in first.rs
+#[cfg(test)]
+mod test {
+    use super::List;
+    #[test]
+    fn basics() {
+        // TODO
+    }
+}
