@@ -27,15 +27,19 @@ fn main() {
 
     let mut depth : i64 = 0;
     let mut pos : i64 = 0;
+    let mut aim : i64 = 0;
     for i in 0..lines.len() {
         let cmds : Vec<&str> = lines[i].split_whitespace().collect();
 
         let steps : i64 = cmds[1].parse().expect("Not an integer!");
 
         match cmds[0] {
-            "forward" => pos += steps,
-            "up" => depth -= steps,
-            "down" => depth += steps,
+            "forward" => {
+                pos += steps;
+                depth += aim * steps;
+            },
+            "up" => aim -= steps,
+            "down" => aim += steps,
             _ => process::exit(0),
         }
     }
