@@ -17,6 +17,7 @@ fn read_inputs(filename : String) -> std::io::Result<String> {
 
 
 fn main() {
+    let slidingWindowSize = 3;
     let mut numbers: Vec<u32>;
     match read_inputs("data".to_string()) {
         Ok(inputs) =>  
@@ -27,8 +28,16 @@ fn main() {
         Err(_) => process::exit(0),
     }
     let mut increased : u32 = 0;
-    for i in 1..numbers.len() {
-        if numbers[i] > numbers[i-1] {
+    let mut slidingWindowSum : u32 = 0;
+    let mut currSWS: u32 = 0;
+
+    for i in 0..slidingWindowSize {
+        slidingWindowSum += numbers[i];
+    }
+
+    for i in slidingWindowSize..numbers.len() {
+        currSWS = slidingWindowSum - numbers[i-slidingWindowSize] + numbers[i];
+        if currSWS > slidingWindowSum {
             increased += 1;
         }
     }
