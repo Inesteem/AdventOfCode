@@ -96,7 +96,6 @@ fn getValue(bits : u32, numbers : &mut Vec<u32>, cmp : fn(a:usize,b:usize) -> bo
 }
 
 fn main() {
-    let slidingWindowSize = 3;
     let mut numbers: Vec<u32>;
     match read_inputs("data".to_string()) {
         Ok(inputs) =>  
