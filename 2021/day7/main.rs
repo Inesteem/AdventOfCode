@@ -14,23 +14,9 @@ fn read_inputs(filename : String) -> std::io::Result<String> {
     Ok(contents)
 }
 
-
-fn main() {
-
-    let mut numbers: Vec<usize>;
-    match read_inputs("test".to_string()) {
-        Ok(inputs) =>  
-            numbers = inputs.split(",")
-            .map(|x| x.parse().expect("Not an integer!"))
-            .collect(),
-        Err(_) => process::exit(0),
-    }
-
-    numbers.sort();
-    println!("{:?}", numbers);
+fn star1(numbers : Vec<usize>) {
     let len = numbers.len();
-
-    let mut costs = vec![0; numbers[len-1]+1];
+     let mut costs = vec![0; numbers[len-1]+1];
     
     let mut numPrev = 0;
     let mut pos = 1;
@@ -60,7 +46,80 @@ fn main() {
     }
     println!("{:?}", costs);
     println!("-> {}", minCosts);
+
+
 }
+
+fn main() {
+
+    let mut numbers: Vec<usize>;
+    match read_inputs("data".to_string()) {
+        Ok(inputs) =>  
+            numbers = inputs.split(",")
+            .map(|x| x.parse().expect("Not an integer!"))
+            .collect(),
+        Err(_) => process::exit(0),
+    }
+
+    numbers.sort();
+    println!("{:?}", numbers);
+    let len = numbers.len();
+    
+    let mut costsForward = vec![0; numbers[len-1]+1];
+    
+    let mut pos : i32 = 0;
+    while pos < (len as i32) {
+        let num = numbers[pos as usize];
+        pos += 1;
+        let mut numPrev = 1;
+
+        while pos < (len as i32) && numbers[pos as usize] == num {
+            numPrev += 1;
+            pos += 1;
+        }
+        
+        let mut costsPrev = 0;
+        
+        for p in (num+1)..=numbers[len-1] {
+            costsPrev += numPrev * (p - num);
+            costsForward[p] += costsPrev;
+        }
+
+    }
+
+    println!("{:?}", costsForward);
+
+ 
+    let mut costsBackward = vec![0; numbers[len-1]+1];
+    
+    pos = (len as i32) - 1;
+    while pos >= 0 {
+        let num = numbers[pos as usize];
+        pos -= 1;
+        let mut numPrev = 1;
+
+        while pos >= 0 && numbers[pos as usize] == num {
+            numPrev += 1;
+            pos -= 1;
+        }
+        
+        let mut costsPrev = 0;
+        for p in (0..num).rev() {
+            costsPrev += numPrev * (num - p);
+            costsBackward[p] += costsPrev;
+        }
+    }
+
+    println!("{:?}", costsBackward);
+ 
+    let mut minCost = costsBackward[0]*2;
+    for i in 0..=numbers[len-1]
+    {
+        minCost = min(minCost, costsBackward[i] + costsForward[i]);
+    }
+    
+    println!("{}", minCost);
+   }
 
 //[0, 1, 1, 2, 2, 2, 4, 7, 14, 16]
 //0 1 2 3  4  5  6  7  8  9  A B C D E F 10
