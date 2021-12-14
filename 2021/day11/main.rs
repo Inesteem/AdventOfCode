@@ -66,10 +66,12 @@ fn main() {
     }
 
 
-    let mut fireNum : u64 = 0;
-    for i in 0..100 {
-        print(&board);
-
+    //let mut fireNum : u64 = 0;
+    //for i in 0..100 {
+    let numOcti = board.len() * board[0].len();
+    let mut step : u64= 0;
+    loop {
+        step += 1;
         for row in 0..board.len() {
              for col in 0..board[row].len() {
                 if fired[row as usize][col as usize]
@@ -79,7 +81,13 @@ fn main() {
 
                 board[row][col] += 1;
                 if board[row][col] > 9 {
-                    fireNum += fire(&mut board, row as isize, col as isize, &mut fired);
+                    //fireNum += fire(&mut board, row as isize, col as isize, &mut fired);
+                    let fireNum = fire(&mut board, row as isize, col as isize, &mut fired);
+                    if fireNum as usize == numOcti {
+                        println!("first time all flash: {}", step);
+                        process::exit(0);
+
+                    }
                 }
              }
         }
@@ -89,7 +97,6 @@ fn main() {
                  fired[row as usize][col as usize] = false;
              }
         }
-        println!("\n{}: {}\n", i, fireNum);
+        //println!("\n{}: {}\n", i, fireNum);
     }
-    print(&board);
 }
