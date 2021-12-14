@@ -37,16 +37,20 @@ fn process_edge<'a>(node : &'a str, map : &mut HashMap<&'a str, usize>, power : 
     key
 }
 
-fn getWays(power : &mut Vec<usize>, graph : & Vec<Vec<usize>>, pos : usize, goal : usize) -> usize 
+fn getWays(power : &mut Vec<usize>, graph : & Vec<Vec<usize>>, pos : usize, goal : usize, magic: usize) -> usize
 {
-    if(pos == goal) { return 1; }
+    if(pos == goal) {
+        if magic == graph.len() { return 1; }
+        if power[magic] == 0 { return 1; }
+        return 0;
+    }
 
     power[pos] -= 1;
 
     let mut ways = 0;
     for next in &graph[pos] {
         if power[*next] == 0 { continue; }
-        ways += getWays(power, graph, *next, goal);
+        ways += getWays(power, graph, *next, goal, magic);
     }
 
     power[pos] += 1;
@@ -57,32 +61,41 @@ fn getWays(power : &mut Vec<usize>, graph : & Vec<Vec<usize>>, pos : usize, goal
 
 fn main() {
 
-    let input: String;
-    match read_inputs("data".to_string()) {
-        Ok(inputs) =>
-            input = inputs,
-        Err(_) => process::exit(0),
+    let files = vec!["test1","test2","test3","data"];
+    for file in files {
+        let input: String;
+        match read_inputs(file.to_string()) {
+            Ok(inputs) =>
+                input = inputs,
+            Err(_) => process::exit(0),
+        }
+
+        let lines : Vec<&str> = input.lines().collect();
+
+        let mut map : HashMap<&str, usize> = HashMap::new();
+        let mut graph : Vec<Vec<usize>> = vec![vec![]];
+        let mut power : Vec<usize> = vec![];
+
+
+        for line in &lines {
+            let edge : Vec<&str> = line.split("-").collect(); 
+            let keyA = process_edge(edge[0], &mut map, &mut power, &mut graph);
+            let keyB = process_edge(edge[1], &mut map, &mut power, &mut graph);
+
+            graph[keyA ].push(keyB);
+            graph[keyB ].push(keyA);
+
+        }
+        let startIdx = *map.get("start").unwrap();
+        let endIdx = *map.get("end").unwrap();
+        let mut ways = getWays(&mut power, &graph, startIdx, endIdx, graph.len());
+        for idx in 0..power.len() {
+            if idx == startIdx || idx == endIdx { continue; }
+            if power[idx] > 1 {continue;}
+            power[idx] += 1;
+            ways += getWays(&mut power, &graph, startIdx, endIdx, idx);
+            power[idx] -= 1;
+        }
+        println!("ways: {}", ways);
     }
-
-    let lines : Vec<&str> = input.lines().collect();
-
-    let mut map : HashMap<&str, usize> = HashMap::new();
-    let mut graph : Vec<Vec<usize>> = vec![vec![]];
-    let mut power : Vec<usize> = vec![];
-
-
-    for line in &lines {
-        let edge : Vec<&str> = line.split("-").collect(); 
-        println!("{:?}", edge); 
-        let keyA = process_edge(edge[0], &mut map, &mut power, &mut graph);
-        let keyB = process_edge(edge[1], &mut map, &mut power, &mut graph);
-
-        graph[keyA ].push(keyB);
-        graph[keyB ].push(keyA);
-
-    }
-    println!("{:?}", map);
-    println!("{:?}", graph);
-    println!("{:?}", power);
-    println!("ways: {}", getWays(&mut power, &graph, *map.get("start").unwrap(), *map.get("end").unwrap()));
 }
