@@ -32,7 +32,7 @@ fn to_num(n : &[u8]) -> u16
 }
 
 trait Parse {
-    fn parse (s : &[u8], indent : String) -> Self;
+    fn parse (s : &[u8]) -> Self;
 }
 
 #[derive(Debug)]
@@ -106,7 +106,7 @@ impl Eval for Packet {
 
 }
 impl Parse for Packet {
-    fn parse (bin : &[u8], indent : String) -> Packet {
+    fn parse (bin : &[u8]) -> Packet {
         let version = to_num(&bin[0..3]);
         let typeId = to_num(&bin[3..6]);
         if typeId == 4 { // literal
@@ -137,9 +137,7 @@ impl Parse for Packet {
 
 
             while pos < start + length && (start + length) - pos > 6 {
-                let mut nextI = indent.clone();
-                nextI.push_str("-");
-                let p = Packet::parse(&bin[pos..start+length], nextI.to_string());
+                let p = Packet::parse(&bin[pos..start+length]);
                 pos += p.size;
 
                 packets.push(p);
@@ -150,9 +148,7 @@ impl Parse for Packet {
             pos = start;
 
             for p in 0..length {
-                let mut nextI = indent.clone();
-                nextI.push_str("-");
-                let p = Packet::parse(&bin[pos..bin.len()], nextI.to_string());
+                let p = Packet::parse(&bin[pos..bin.len()]);
                 pos += p.size;
 
                 packets.push(p);
@@ -199,29 +195,11 @@ fn main() {
         for line in lines {
             println!("{}", line);
             let bin = get_binary(&line);
-            let p = Packet::parse(&bin, "".to_string());
+            let p = Packet::parse(&bin);
             //println!("{:?}", p);
             println!("star1: {}", p.cnt_vnums());
             println!("star2: {}", p.eval());
-            continue;
-
-            println!("1----------------------");
-            let bin1 : Vec<u8>= "110100101111111000101000".to_string().chars().map(|x| if x == '0' { return 0;} else {return 1;}). collect();
-            let p1 = Packet::parse(&bin1[0..bin1.len()], "".to_string());
-            println!("{:?}", p1);
-
-
-            println!("2----------------------");
-            let bin2 : Vec<u8>= "00111000000000000110111101000101001010010001001000000000".to_string().chars().map(|x| if x == '0' { return 0;} else {return 1;}). collect();
-            let p2 = Packet::parse(&bin2[0..bin2.len()], "".to_string());
-            println!("{:?}", p2);
-
-            println!("3----------------------");
-            let bin3 : Vec<u8>= "11101110000000001101010000001100100000100011000001100000".to_string().chars().map(|x| if x == '0' { return 0;} else {return 1;}). collect();
-            let p3 = Packet::parse(&bin3[0..bin3.len()], "".to_string());
-            println!("{:?}", p3);
         }
-
 
     }
 }
