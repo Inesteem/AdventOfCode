@@ -14,7 +14,7 @@ fn read_inputs(filename : String) -> std::io::Result<String> {
 }
 fn read_in_one_char() {
     let input: Option<i32> = std::io::stdin()
-        .bytes() 
+        .bytes()
         .next()
         .and_then(|result| result.ok())
         .map(|byte| byte as i32);
@@ -294,19 +294,19 @@ fn main() {
             }
             println!("{}", tree.magnitude());
         }
-        else 
+        else
         {
             let mut maxMagn = 0;
             for t1 in 0..trees.len() {
                 for t2 in 0..trees.len() {
                     if t1 == t2 { continue; }
-                        let mut tree = BinaryTree::<u8>::add(trees[t1].clone(), trees[t2].clone());
-                        tree.reduce();
-                        maxMagn = max(maxMagn, tree.magnitude());
+                    let mut tree = BinaryTree::<u8>::add(trees[t1].clone(), trees[t2].clone());
+                    tree.reduce();
+                    maxMagn = max(maxMagn, tree.magnitude());
                 }
             }
             println!("{}", maxMagn);
-        
+
         }
     }
 }
