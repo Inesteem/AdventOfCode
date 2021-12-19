@@ -47,8 +47,34 @@ fn is_naughty( word : &str) -> bool {
     return false;
 }
 
+
+fn is_nice2( word : &str) -> bool {
+    let mut repeats = false;
+
+    for i in 0..word.len()-2 {
+        let c1 = &word[i..i+1];
+        let c2 = &word[i+2..i+3];
+        if c1 == c2 {
+            repeats = true;
+            break;
+        }
+    }
+    if !repeats { return false; }
+
+    for i1 in 0..word.len()-2 {
+        let c1 = &word[i1..i1+2];
+        for i2 in i1+2..word.len()-1 {
+            let c2 = &word[i2..i2+2];
+            if c1 == c2 {
+                return true;
+            }
+        }
+    }
+    false
+}
+
 fn main() {
-    let files = vec!["test", "data"];
+    let files = vec!["test2", "data"];
     for file in files {
         let input: String;
         match read_inputs(file.to_string()) {
@@ -60,12 +86,17 @@ fn main() {
         let lines : Vec<&str>= input.lines().collect();
 
         let mut niceOnes = 0;
+        let mut niceOnes2 = 0;
         for line in lines {
             if is_nice(&line) && !is_naughty(&line) {
                 niceOnes += 1;
             } 
+            if is_nice2(&line) { 
+                niceOnes2 += 1;
+            }
         
         }
         println!("star1: {}", niceOnes );
+        println!("star2: {}", niceOnes2 );
     }
 }
