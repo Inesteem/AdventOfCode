@@ -6,8 +6,6 @@ use std::isize;
 use itertools::Itertools;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
-use rand::Rng;
-use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fmt;
 
@@ -28,6 +26,7 @@ fn read_inputs(filename : String) -> std::io::Result<String> {
 //}
 
 
+type Mutation =(Transformation,Transformation,Transformation,Transformation,Translation);
 #[derive(Debug,Clone,Hash)]
 pub struct Beacon
 {
@@ -85,22 +84,22 @@ pub fn applyTrans(beacon : &mut Beacon, trafo : &Transformation) {
     }
 }
 
-pub fn get_matches(beacons : &Vec<Beacon>, map : &HashMap<Beacon, usize>, trafos : &(Transformation,Transformation, Transformation, isize)) -> usize {
+pub fn get_matches(beacons : &Vec<Beacon>, map : &HashSet<Beacon>, trafos : &Mutation) -> usize {
 
-    let mut num = 0;
+    let mut shared = 0;
     for beacon in beacons {
         let mut b : Beacon = beacon.clone();
-        applyTrans(&mut b, &trafos.0);
-        applyTrans(&mut b, &trafos.1);
-        applyTrans(&mut b, &trafos.2);
-        if map.contains_key(&b) { num += 1; }
+        b.apply(&trafos);
+
+        if map.contains(&b) { shared += 1; }
     }
 
-    num
+    shared 
 }
 
 
-
+// b - muster = x
+// b - x = muster;
 impl Translation {
 
     pub fn new(b1 : &Beacon, b2 : &Beacon) -> Self {
@@ -115,20 +114,9 @@ impl Translation {
     }
 
 }
-
-pub fn basic_check(b1 : &Beacon, b2 : &Beacon) -> bool {
-   let mut v1 = vec![isize::abs(b1.x),isize::abs(b1.y),isize::abs(b1.z)];
-   let mut v2 = vec![isize::abs(b2.x),isize::abs(b2.y),isize::abs(b2.z)];
-   v1.sort();
-   v2.sort();
-   if v1[1] - v1[0] != v2[1] - v2[0] {return false;}
-   if v1[2] - v1[0] != v2[2] - v2[0] {return false;}
-   true
-}
-
-pub fn get_transformations(muster : &Beacon, current : &Beacon) -> Vec<(Transformation,Transformation,Transformation, isize)> {
+pub fn get_transformations(muster : &Beacon, current : &Beacon) -> Vec<Mutation> {
     let mut trafos = vec![];
-    if !basic_check(muster,current) { return trafos; }
+
     for trafo1 in Transformation::iter() {
         let mut b1 = (*current).clone();
         applyTrans(&mut b1, &trafo1);
@@ -141,9 +129,12 @@ pub fn get_transformations(muster : &Beacon, current : &Beacon) -> Vec<(Transfor
                 let mut b3 = b2.clone();
                 applyTrans(&mut b3, &trafo3);
 
-                let t = Translation::new(&b3, muster);
-                if t.valid() {
-                    trafos.push((trafo1.clone(), trafo2.clone(), trafo3, t.x));
+                for trafo4 in Transformation::iter() {
+                    let mut b4 = b3.clone();
+                    applyTrans(&mut b4, &trafo4);
+
+                    let t = Translation::new(&b4, muster);
+                    trafos.push((trafo1.clone(), trafo2.clone(), trafo3.clone(), trafo4, t));
                 }
             }
         }
@@ -159,36 +150,61 @@ impl Beacon
         Beacon{ x : x, y : y, z : z}
     }
 
+    pub fn sub(&mut self, t : &Translation) {
+        self.x -= t.x;
+        self.y -= t.y;
+        self.z -= t.z;
+    }
+    pub fn apply(&mut self, trafos : &Mutation) {
+        applyTrans(self, &trafos.0);
+        applyTrans(self, &trafos.1);
+        applyTrans(self, &trafos.2);
+        applyTrans(self, &trafos.3);
+        self.sub(&trafos.4);
+    }
 }
 
 #[derive(Debug)]
 pub struct Scanner {
+    inited : bool,
+    pos : Beacon,
     beacons : Vec<Beacon>,
-    map : HashMap< Beacon, usize>,
+    map : HashSet<Beacon>,
 }
 
 
 impl Scanner {
     pub fn new(lines : &Vec<&str>, pos : &mut usize) -> Self {
         let mut beacons = vec![];
-        let mut map = HashMap::new();
-        let mut rng = rand::thread_rng();
-        let n1 : isize = rng.gen::<i8>() as isize;
 
         while *pos < lines.len() {
             if lines[*pos].len() == 0 { break; }
-            let mut beacon = Beacon::new(&lines[*pos]);
-
-            map.insert(beacon.clone(), beacons.len());
+            let beacon = Beacon::new(&lines[*pos]);
+            println!("{}", beacon);
             beacons.push(beacon);
             *pos += 1;
         }
         println!();
-        Scanner { beacons : beacons, map : map }
+        Scanner { inited : false, pos : Beacon{x : 0, y : 0, z : 0}, beacons : beacons, map : HashSet::new()}
+    }
+
+    pub fn init(&mut self) {
+        self.inited = true;
+        for i in 0..self.beacons.len() {
+            self.map.insert(self.beacons[i].clone());
+        }
+    }
+
+    pub fn apply(&mut self, t : Mutation) {
+        self.pos.apply(&t);
+       for i in 0..self.beacons.len() {
+            self.beacons[i].apply(&t);
+       }
+       self.init();
     }
 }
 
-#[derive(Debug,PartialEq,Clone,Hash)]
+#[derive(Debug,PartialEq,Clone,Hash,Eq)]
 pub struct Translation {
     x : isize,
     y : isize,
@@ -201,7 +217,7 @@ impl fmt::Display for Translation{
     }
 }
 fn main() {
-    let files = vec!["simple"];
+    let files = vec!["data"];
     for file in files {
         let input: String;
         match read_inputs(file.to_string()) {
@@ -220,28 +236,59 @@ fn main() {
             pos += 2;
         }
 
-        let scanner0 = &scanners[0];
+        scanners[0].init();
 
-        for scanner in &scanners[1..scanners.len()] {
-            let mut checked = HashSet::new();
-            for i in 0..scanner0.beacons.len() {
-                for j in 0..scanner.beacons.len() {
-                    let b1 = &scanner0.beacons[i];
-                    let b2 = &scanner.beacons[j];
-                    let trafos = get_transformations(b1, b2);
+        let mut todo : Vec<usize> = vec![0];
 
-                    for trafo in trafos {
-                        if checked.contains(&trafo) { continue; }
+        while todo.len() != 0 {
+            let refIdx = todo.remove(todo.len()-1);
 
-                        let matches = get_matches(&scanner.beacons, &scanner0.map, &trafo);
-                        println!("{:?}: {}", trafo, matches);
+            for scanIdx in 1..scanners.len() {
+                if scanners[scanIdx].inited { continue; }
 
-                        checked.insert(trafo);
+                let mut checked = HashSet::new();
+
+                let lRef = scanners[refIdx].beacons.len();
+                'search : for i in 0..lRef {
+
+                    let lScan = scanners[scanIdx].beacons.len();
+                    for j in 0..lScan {
+
+                        let trafos = get_transformations(
+                            &scanners[refIdx].beacons[i],
+                            &scanners[scanIdx].beacons[j]);
+
+                        for trafo in trafos {
+                            if checked.contains(&trafo) { continue; }
+
+                            let matches = get_matches(&scanners[scanIdx].beacons, &scanners[refIdx].map, &trafo);
+                            if matches >= 12 {
+                                println!("{} -> {}, {:?}", refIdx, scanIdx, trafo);
+                                scanners[scanIdx].apply(trafo);
+                                println!("scanner {}: {}", scanIdx, scanners[scanIdx].pos);
+                                todo.push(scanIdx);
+                                break 'search;
+                            }
+
+                            checked.insert(trafo);
+                        }
                     }
                 }
             }
             println!("");
         }
+        
+        let mut map = HashSet::new();
+        let mut i = 0;
+        for scanner in &scanners {
+            if !scanner.inited { panic!("scanner {} not initalized!", i);}
+             for b in &scanner.beacons {
+                map.insert(b);
+             }
+             i+=1;
+        }
+
+        println!("{}", map.len());
 
         //for b1 in &scanner0.beacons {
         //    for b2 in &scanners[1].beacons {
