@@ -8,6 +8,7 @@ use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 use std::collections::HashSet;
 use std::fmt;
+use std::cmp::max;
 
 fn read_inputs(filename : String) -> std::io::Result<String> {
     let file = File::open(filename)?;
@@ -162,6 +163,14 @@ impl Beacon
         applyTrans(self, &trafos.3);
         self.sub(&trafos.4);
     }
+
+
+    pub fn manhatten(&self, other : &Beacon) -> usize{
+       let xdiff = isize::abs(self.x - other.x);
+       let ydiff = isize::abs(self.y - other.y);
+       let zdiff = isize::abs(self.z - other.z);
+       xdiff as usize + ydiff as usize + zdiff as usize
+    }
 }
 
 #[derive(Debug)]
@@ -201,6 +210,10 @@ impl Scanner {
             self.beacons[i].apply(&t);
        }
        self.init();
+    }
+
+    pub fn manhatten(&self, other : &Scanner) -> usize {
+        self.pos.manhatten(&other.pos)
     }
 }
 
@@ -288,8 +301,16 @@ fn main() {
              i+=1;
         }
 
-        println!("{}", map.len());
+        println!("star1: {}", map.len());
 
+        let mut manhatten = 0;
+        for i in 0..scanners.len() {
+            for j in i+1..scanners.len() {
+                manhatten = max(manhatten, scanners[i].manhatten(&scanners[j]));
+            }
+        }
+
+        println!("star2: {}", manhatten);
         //for b1 in &scanner0.beacons {
         //    for b2 in &scanners[1].beacons {
 
