@@ -27,7 +27,7 @@ fn is_nice( word : &str) -> bool {
                 numVocals += 1;
             }
         }
-        if c == lastC { 
+        if c == lastC {
             doubles = true;
         }
         lastC = c;
@@ -37,7 +37,7 @@ fn is_nice( word : &str) -> bool {
 }
 
 fn is_naughty( word : &str) -> bool {
-    
+
     for i in 0..word.len()-1 {
         for substr in &["ab", "cd", "pq","xy"] {
             if &word[i..i+2] == *substr { return true;}
@@ -90,11 +90,11 @@ fn main() {
         for line in lines {
             if is_nice(&line) && !is_naughty(&line) {
                 niceOnes += 1;
-            } 
-            if is_nice2(&line) { 
+            }
+            if is_nice2(&line) {
                 niceOnes2 += 1;
             }
-        
+
         }
         println!("star1: {}", niceOnes );
         println!("star2: {}", niceOnes2 );
