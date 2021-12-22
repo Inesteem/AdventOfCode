@@ -21,21 +21,22 @@ fn read_inputs(filename : String) -> std::io::Result<String> {
 //}
 
 fn get_index(board : &[Vec<bool>], row : isize, col : isize, infinity_val : bool) -> usize {
-    
+
     let mut result = 0;
     for r in row-1..=row+1 {
         for c in col-1..=col+1 {
             result <<= 1;
 
-            if r < 0 || 
-               c < 0 || 
-               r >= (board.len() as isize) || 
-               c >= (board[0].len() as isize) { 
-                    if infinity_val { result |= 1; } 
-                   continue; }
+            if r < 0 ||
+               c < 0 ||
+               r >= (board.len() as isize) ||
+               c >= (board[0].len() as isize) {
+                    if infinity_val { result |= 1; }
+                   continue;
+               }
 
             if board[r as usize][c as usize]{
-                result |= 1; 
+                result |= 1;
             }
         }
     }
@@ -45,7 +46,7 @@ fn get_index(board : &[Vec<bool>], row : isize, col : isize, infinity_val : bool
 
 fn main() {
 //    std::io::stdin().read_to_string(&mut input).unwrap();
-    let files = vec!["test"];
+    let files = vec!["data"];
 //    let files = vec!["test", "data"];
     for file in files {
         let input: String;
@@ -56,13 +57,13 @@ fn main() {
         }
 
         let lines : Vec<Vec<bool>>= input.lines()
-            .map(|x| x.chars().map(|y| 
+            .map(|x| x.chars().map(|y|
                                    match y {
                                        '#' => true,
                                        _ => false,
                                    }
                                    ).collect())
-            
+
             .collect();
 
         let encoding = &lines[0];
@@ -70,14 +71,13 @@ fn main() {
         let mut new_board;
         let mut board : Vec<Vec<bool>> = lines[2..lines.len()].iter().cloned().collect();
 
-        for i in 1..5 {
+        for i in 1..51 {
 
             let width = board[0].len();
             let height= board.len();
             new_board = vec![vec![false; width+2]; height+2];
             let mut lit = 0;
             let mut dark = 0;
-            println!("{} {}",width, height);
             let mut infinity_val = false;
             if i % 2 == 0 {
                 infinity_val = encoding[0];
@@ -85,24 +85,25 @@ fn main() {
 
             for row in -1..=height as isize {
                 for col in -1..=width as isize {
-                
+
                     let idx = get_index(&board, row, col, infinity_val);
                     new_board[(row+1) as usize][(col+1) as usize] = encoding[idx];
 
                     if encoding[idx] {
-                        if i % 2 == 0 {print!("#");}
+                        if false {print!("#");}
                         lit += 1;
                     } else {
-                        if i % 2 == 0 {print!(".");}
+                        if false {print!(".");}
                         dark += 1;
                     }
                 }
 
-                if i % 2 == 0 {println!();}
+                if false {println!();}
             }
 
             board = new_board;
-            if i % 2 == 0 {println!("{}", lit);}
+            //Too height:21859
+            if true {println!("{}", lit);}
         }
     }
 }
