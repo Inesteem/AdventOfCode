@@ -70,7 +70,7 @@ fn main() {
         let mut new_board;
         let mut board : Vec<Vec<bool>> = lines[2..lines.len()].iter().cloned().collect();
 
-        for i in 0..3 {
+        for i in 1..5 {
 
             let width = board[0].len();
             let height= board.len();
@@ -90,19 +90,19 @@ fn main() {
                     new_board[(row+1) as usize][(col+1) as usize] = encoding[idx];
 
                     if encoding[idx] {
-                        print!("#");
+                        if i % 2 == 0 {print!("#");}
                         lit += 1;
                     } else {
-                        print!(".");
+                        if i % 2 == 0 {print!(".");}
                         dark += 1;
                     }
                 }
 
-                println!();
+                if i % 2 == 0 {println!();}
             }
 
             board = new_board;
-            println!("\n{} pixels are lit!\n", lit);
+            if i % 2 == 0 {println!("{}", lit);}
         }
     }
 }
