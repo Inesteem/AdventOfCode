@@ -50,38 +50,6 @@ fn get_val(c : &str, regs:&RegCache) -> isize
     }
     regs[reg as usize]
 }
-
-fn add(r1:Register, r2:Register) -> impl Fn(&mut RegCache) {
-    move |regs : &mut RegCache| {
-            let val = regs[r2 as usize];
-            regs[r1 as usize] += val;
-    }
-}
-fn addi(r1:Register, val : isize) -> impl Fn(&mut RegCache) +  'static{
-    move |regs : &mut RegCache| {regs[r1 as usize] += val;}
-}
-//
-//fn sub(x: isize) -> impl Fn(isize)-> isize {
-//    return move |y| x - y;
-//}
-//
-//fn modi(x: isize) -> impl Fn(isize)-> isize {
-//    return move |y| x % y;
-//}
-//
-//fn div(x: isize) -> impl Fn(isize)-> isize {
-//    return move |y| x / y;
-//}
-//
-//fn mul(x: isize) -> impl Fn(isize)-> isize {
-//    return move |y| x * y;
-//}
-//
-//fn eql(x: isize) -> impl Fn(isize)-> isize {
-//    return move |y| if x == y {return 1;} else {return 0};
-//}
-//
-//
 fn read_inputs(filename : String) -> std::io::Result<String> {
     let file = File::open(filename)?;
     let mut buf_reader = BufReader::new(file);
@@ -158,39 +126,52 @@ struct Instruction
 {
     op : Operation,
     dst: Register,
-    src : isize,
-    func : dyn Fn(&mut RegCache),
+    src : Register,
+    val: isize,
 }
 
+fn bool_to_int(b : bool) -> isize {
+    if b { return 1; }
+    0
+}
 impl Instruction
 {
-    fn new(line : &str, regs : &mut RegCache) -> Self {
+    fn new(line : &str) -> Self {
         let parts : Vec<&str> = line.split_whitespace().collect();
         let dst =  get_reg(parts[1]);
         let op =  get_op(parts[0]);
+        let mut val = -1;
+        let mut src = Register::Invalid;
 
-        //if op == Operation::INP {
-        //    inputIdx += 1;
-        //    return Instruction{op : op, dst : dst, src : -1, func : &addi(dst, 1)};//&input(inputIdx)};
-        //}
-        let src : isize =  parts[2].parse().unwrap();
-
-        //let mut func = match op {
-        //    Operation::ADD => &add(dst1)),
-        //    //Operation::SUB => &sub(dst1)),
-        //    //Operation::MOD => &modi(dst1)),
-        //    //Operation::DIV => &div(dst1)),
-        //    //Operation::MUL => &mul(dst1)),
-        //    //Operation::EQL => &eql(dst1)),
-        //    //Operation::NEQ => &eql(dst1)),
-        //    _=> { panic!("not implemented {}", line[0]); }
-        //};
-
-        //Instruction{op : op, dst : dst, src : src, func}
-            Instruction{op : op, dst : dst, src : -1, func : addi(dst, 1)}
-
+        let mut src : isize = isize::Max_value();
+        if parts.len() > 2 {
+            src = get_reg(parts[2]);
+            if src == Register::Invalid { 
+                val =  parts[2].parse().unwrap();
+            }
+        }
+        Instruction{op : op, dst : dst, src : src, val : val}
     }
 
+    fn apply(&self, regs : &mut RegCache) {
+        let mut op2 = self.val;
+        if self.src != Register::Invalid {
+            op2 = regs[self.src as usize];
+        }
+
+        let val = match self.op {
+            Operation::INP => 9,
+            Operation::ADD => regs[self.dst] + op2,
+            Operation::SUB => regs[self.dst] - op2,
+            Operation::MOD => regs[self.dst] % op2,
+            Operation::DIV => regs[self.dst] / op2,
+            Operation::MUL => regs[self.dst] * op2,
+            Operation::EQL => bool_to_int(regs[self.dst] == op2),
+            Operation::NEQ=> bool_to_int(regs[self.dst] != op2),
+        };
+
+        registers[self.dst as usize] = val;
+    }
 
     fn print(&self) 
     {
