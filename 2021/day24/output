@@ -1,0 +1,65 @@
+13 read &input
+z = input + 6
+
+12 read &input
+z = z*26 + input + 12
+
+11 read &input
+z = z*26 + input + 5
+
+10 read &input
+z = z*26 + input + 10
+
+// erste entscheidung
+9 read &input
+if (input != (z%26)-16)
+  z += input + 7
+else 
+  z/=26
+
+8 read &input // 9
+z += input + 7
+
+9 read &input // 9
+z += input + 4
+
+6 read &input
+if (input != (z%26)-4)
+  z += input + 12
+else 
+  z/=26
+
+5 read &input
+z += z*26 + input + 14
+
+4 read &input
+if (input != (z%26)-7)
+  z += input + 13
+else 
+  z/=26
+
+//9,36
+3 read &input
+if (input != (z%26)-8)
+  z += input + 10
+else 
+  z/=26
+
+//9,46
+2 read &input
+if (input != (z%26)-4)
+  z += input + 11
+else 
+  z/=26
+
+1 read &input
+if (input != (z%26)-15)
+  z += input + 9
+else 
+  z/=26
+
+0 read &input
+if (input != (z%26)-8)
+  z += input + 9
+else 
+  z = z/26

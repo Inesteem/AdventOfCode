@@ -1,0 +1,126 @@
+
+13 read &w
+x = z % 26 + 12
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w + 6 * x
+z += y
+
+12 read &w
+x = z % 26 + 11
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w + 12 * x
+z += y
+
+11 read &w
+x = z % 26 + 10
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w + 5 * x
+z += y
+
+10 read &w
+x = z % 26 + 10
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w + 10 * x
+z += y
+
+9 read &w
+x = z % 26
+z /= 26
+x += -16
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w + 7 * x
+z += y
+
+8 read &w
+x = z % 26 + 14
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w * x
+z += y
+
+7 read &w
+x = z % 26 + 12
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w + 4 * x
+z += y
+
+6 read &w
+x = z % 26
+z /= 26
+x += -4
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w + 12 * x
+z += y
+
+5 read &w
+x = z % 26 + 15
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w + 14 * x
+z += y
+
+4 read &w
+x = z % 26
+z /= 26
+x += -7
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w + 13 * x
+z += y
+
+3 read &w
+x = z % 26
+z /= 26
+x += -8
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w + 10 * x
+z += y
+
+2 read &w
+x = z % 26
+z /= 26
+x += -4
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w + 11 * x
+z += y
+
+1 read &w
+x = z % 26
+z /= 26
+x += -15
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w + 9 * x
+z += y
+
+0 read &w
+x = z % 26
+z /= 26
+x += -8
+x = (x != w) ? 1 : 0
+y = 25 * x + 1
+z *= y
+y = w + 9 * x
+z += y
