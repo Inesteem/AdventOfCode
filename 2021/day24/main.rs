@@ -55,13 +55,14 @@ fn read_inputs(filename : String) -> std::io::Result<String> {
     Ok(contents)
 }
 
-fn read_in_one_char() {
-    let input: Option<i32> = std::io::stdin()
-        .bytes()
-        .next()
-        .and_then(|result| result.ok())
-        .map(|byte| byte as i32);
-}
+//debugging
+//fn read_in_one_char() {
+//    let input: Option<i32> = std::io::stdin()
+//        .bytes()
+//        .next()
+//        .and_then(|result| result.ok())
+//        .map(|byte| byte as i32);
+//}
 
 fn alu(instructions: &Vec<Instruction>, monad : &mut [isize;14]) -> isize
 {
@@ -73,9 +74,7 @@ fn alu(instructions: &Vec<Instruction>, monad : &mut [isize;14]) -> isize
         if !ins.apply(&mut registers) {
 
             let val = ins.set(&mut registers, monad[i], 13-i);
-            //println!("{}: {:?}   {} ", 13-i, registers, val);
-            if val <= 0 || val >= 10 { return -(13-i as isize); }
-            //read_in_one_char();
+            if val <= 0 || val >= 10 { return -(13-i as isize)-1; }
             monad[i] = val;
             i += 1;
         }
@@ -320,6 +319,9 @@ fn main() {
             filter(|i| !i.nop()).
             collect();
 
+        //TODO: rename let mut instructions to nextInstr
+        //uncomment this to get optimized assembler output
+        //see output txt for manually edited assembly
         //let mut instructions = vec![];
 
         //loop { if nextInstr.len() == instructions.len() { break; }
@@ -346,26 +348,42 @@ fn main() {
         //}
         //print_instructions_hr(&instructions);
         //process::exit(0);
+        //
+        //
 
+        //check one specifc input
+        //let mut monad1 : [isize;14] = [1,4,1,7,1,9,1,1,1,8,1,2,1,1];
+        //println!("{}", alu(&instructions, &mut monad1));
+        //let key1 : String = monad1.into_iter().map(|x| x.to_string()).collect();
+        //println!("{}", key1);
+        //process::exit(0);
+
+        let star : u8 = 2;
         let mut checked = HashSet::new();
-        let mut monad : [isize;14] = [9;14];
+        let mut dir = -1;
+        let mut start = 9;
+        if star == 2 {
+            dir = 1;
+            start = 1;
+        }
+        let mut monad : [isize;14] = [start;14];
         let mut valid = 1;
         while valid != 0{
             valid = alu(&instructions, &mut monad);
             if valid < 0
             {   
-                for i2 in ((-valid) as usize)+1..14 {
+                for i2 in ((-valid) as usize)..14 {
                     let i = 13 - i2;
                     if [13,13-1,13-2,13-3,13-4,13-6,13-9].contains(&i){ continue; }
 
-                    if monad[i] == 1 {
-                        monad[i] = 9;
+                    if monad[i] == 10-start {
+                        monad[i] = start;
                         continue;
                     }
-                    monad[i] -= 1;
+                    monad[i] += dir;
                     let key : String = monad.into_iter().map(|x| x.to_string()).collect();
                     if checked.contains(&key) {
-                        monad[i] += 1;
+                        monad[i] += dir * -1;
                         continue;
                     }
                     checked.insert(key);
@@ -375,7 +393,6 @@ fn main() {
             }
         }
         let key : String = monad.into_iter().map(|x| x.to_string()).collect();
-        println!("star1 {}", key);
-
+        println!("{}", key);
     }
 }
