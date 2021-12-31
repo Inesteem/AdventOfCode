@@ -216,7 +216,7 @@ fn main() {
             move_easters(&mut sea_floor, &easters, &mut new_easters, &mut southers);
             southers.sort_by(|a,b| a.col.cmp(&b.col));
             move_southers(&mut sea_floor, &southers, &mut new_easters, &mut new_southers);
-            
+
             easters = new_easters;
             easters.sort_by(|a,b| a.row.cmp(&b.row));
             new_easters = vec![];
