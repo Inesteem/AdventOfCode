@@ -1,7 +1,6 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
-use std::collections::HashMap;
 
 fn read_inputs(filename : String) -> std::io::Result<String> {
     let file = File::open(filename)?;
@@ -11,11 +10,6 @@ fn read_inputs(filename : String) -> std::io::Result<String> {
     contents.pop();
     Ok(contents)
 }
-
-fn get_idx(s : &str) -> usize {
-    s.chars().next().unwrap() as usize - 'a' as usize
-}
-
 
 fn string_len(s : &str) -> usize {
     let v : Vec<char> = s.chars().collect();
