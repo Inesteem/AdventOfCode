@@ -1,8 +1,9 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
-use std::process;
 use std::isize;
+
+const DEBUG : bool = false;
 
 fn read_inputs(filename : String) -> std::io::Result<String> {
     let file = File::open(filename)?;
@@ -36,11 +37,19 @@ fn get_light(board : &[Vec<bool>], row : isize, col : isize) -> bool {
     return lit == 3;
 
 }
-
+fn lit_all_corners(board : &mut Vec<Vec<bool>>) {
+    //if star1: disable
+    let width = board[0].len();
+    let height= board.len();
+    board[0][0] = true;
+    board[0][width-1] = true;
+    board[height-1][0] = true;
+    board[height-1][width-1] = true;
+}
 fn main() {
 //    std::io::stdin().read_to_string(&mut input).unwrap();
-//    let files = vec!["data"];
-    let files = vec!["test", "data"];
+    let files = vec!["data"];
+//    let files = vec!["test", "data"];
     for file in files {
         let input: String;
         match read_inputs(file.to_string()) {
@@ -61,6 +70,7 @@ fn main() {
 
         let mut new_board;
         let mut board : Vec<Vec<bool>> = lines.iter().cloned().collect();
+        lit_all_corners(&mut board);
 
         let width = board[0].len();
         let height= board.len();
@@ -75,16 +85,17 @@ fn main() {
                     new_board[row][col] = get_light(&board, row as isize, col as isize);
 
                     if new_board[row][col] {
-                        if false {print!("#");}
+                        if DEBUG {print!("#");}
                     } else {
-                        if false {print!(".");}
+                        if DEBUG {print!(".");}
                     }
                 }
 
-                if false {println!();}
+                if DEBUG {println!();}
             }
 
             board = new_board;
+            lit_all_corners(&mut board);
 
             let mut lit = 0;
             for row in &board { for light in row { if *light { lit += 1; } } }
