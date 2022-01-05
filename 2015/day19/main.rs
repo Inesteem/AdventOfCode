@@ -28,7 +28,7 @@ fn main() {
         }
         let lines : Vec<&str> = input.lines().collect();
 
-        let word : &str= lines[lines.len()-1];
+        let goal: &str= lines[lines.len()-1];
         let replacements :Vec<(&str, &str)> = lines[0..lines.len()-2].iter().map(|w|
             {
                 let parts : Vec<&str> = w.split_whitespace().collect();
@@ -46,17 +46,35 @@ fn main() {
 
         let mut set : HashSet<String> = HashSet::new();
         
-        permut(&map, &mut set, &word, 0);
+        permut(&map, &mut set, &goal, 0);
         println!("{}", set.len());
         //770 to high
+        //
+        let mut checked = HashSet::new();
+        let mut todo = HashSet::new();
+        todo.insert("e".to_string());
+
+        while !checked.contains(&goal.to_string())  {
+            if todo.len() == 0 {break;}
+            let mut next_todo = HashSet::new();
+
+            for word in &todo {
+                println!("{}", word);
+                if word.len() > goal.len() { continue; }
+                if checked.contains(word) { continue; }
+                checked.insert(word.clone());
+                permut(&map, &mut next_todo, word, 0);
+            }
+
+            todo = next_todo;
+        }
     }
 }
 
 fn addString(map : &HashMap<&str,Vec<&str>>, set : &mut HashSet<String>, word : &str, pos : usize, len : usize) {
     for repl in map.get(&word[pos..pos+len]).unwrap()
     {
-        let mut w2 : String = word[0..pos].to_string() + repl + &word[pos+len..word.len()].to_string();
-        println!("{} {}", pos, w2);
+        let w2 : String = word[0..pos].to_string() + repl + &word[pos+len..word.len()].to_string();
         set.insert(w2);
     }
 }
