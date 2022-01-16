@@ -12,10 +12,16 @@ SHIELD_TIME = 6
 POISON_TIME = 6
 RECHARGE_TIME = 5 
 
-minMana = 10000000000;
+minMana = 10000000000
+star2=True
 
 def battle(pTurn, pHit, pMan, bHit, bDmg, mana, sLeft, pLeft, rLeft, action):
     global minMana
+
+    if pTurn and star2:
+        pHit -= 1
+        if pHit <= 0:
+            return -1
 
     #RECHARGE
     if rLeft >= 0:
@@ -31,7 +37,6 @@ def battle(pTurn, pHit, pMan, bHit, bDmg, mana, sLeft, pLeft, rLeft, action):
         bHit -= 3
 
     if pTurn:
-
         if int(action) > pMan:
             return -1
 
@@ -59,12 +64,13 @@ def battle(pTurn, pHit, pMan, bHit, bDmg, mana, sLeft, pLeft, rLeft, action):
     else: #BOSS TURN
         pHit -= max(1, bDmg-pArm)
 
-    if pHit <= 0: #PLAYER DEAD
-        return -1
 
     if bHit <= 0: #BOSS DEAD
         minMana = min(mana, minMana)
         return mana
+    
+    if pHit <= 0: #PLAYER DEAD
+        return -1
 
     if not pTurn:
         return battle(not pTurn, pHit, pMan, bHit, bDmg, mana, sLeft-1, pLeft-1, rLeft-1, action)
