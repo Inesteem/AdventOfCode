@@ -27,98 +27,111 @@ struct Package {
 }
 
 impl Package {
-    
-    fn add_weight(&self, w : usize) -> Self 
+    fn add_weight(&mut self, w : usize)
     {
-        Package{ w : self.w + w, q : self.q * w, n : self.n + 1}
+        self.w += w;
+        self.q *= w;
+        self.n += 1;
     }
-
 }
 
-fn get_q(p1 : &Package, p2 : &Package, p3 : &Package) -> usize
+fn get_q(mut packages : &Vec<Package>) -> usize
 {
-    let mut v = vec![p1,p2,p3];
-    v.sort_by(|a,b| a.n.partial_cmp(&b.n).unwrap());
-    if v[0].n == v[1].n {
-        if v[1].n == v[2].n { return min(min(v[0].q, v[1].q), v[2].q); }
-        return min(v[0].q, v[1].q);
+    let mut q = packages[0].q;
+    for i in 1..packages.len() {
+        if packages[i].n != packages[i-1].n {
+            break;
+        }
+        q = min(q, packages[i].q);
     }
-    v[0].q
+    return q;
 }
 
-fn get_key(pos : usize, p1 : &Package, p2 : &Package, p3 : &Package) -> usize
+
+fn get_key(pos : usize, mut packages: &Vec<Package>) -> u128
 {
-    //pos 5 bit
-    //w1 11 bit
-    //w2 11 bit
-    //w3 11 bit
-    //-> 38 bit
-    //n1 -> 4 bit
-    //n2 -> 4 bit
-    //n3 -> 4 bit
-    //-> 60 bit
-    //
-//    let q = get_q(p1,p2,p3);
-    let mut v = vec![p1,p2,p2];
-    v.sort_by(|a,b| a.n.partial_cmp(&b.n).unwrap());
-    let mut key = pos;
-    key <<= 11;
-    key |= p1.w;
-    key <<= 11;
-    key |= p2.w;
-    key <<= 11;
-    key |= p3.w;
-    key <<= 4;
-    key |= p1.n;
-    key <<= 4;
-    key |= p2.n;
-    key <<= 4;
-    key |= p3.n;
+    let mut key = pos as u128;
+    for i in 0..packages.len() {
+        key <<= 12;
+        key |= packages[i].w as u128;
+    }
+    for i in 0..packages.len() {
+        assert!(packages[i].n < 32);
+        key <<= 5;
+        key |= packages[i].n as u128;
+    }
     key
 }
-
+fn all_the_same(packages : &Vec<Package>) -> bool {
+    for i in 1..packages.len() {
+        if packages[i].w != packages[0].w { return false; }
+    }
+    true
+}
 fn abs(a : usize, b : usize) -> usize {
     if a > b { return a-b;}
     b-a
 }
 
-fn good_func_name(weights : &Vec<usize>, sum : usize, pos : usize, p1 : Package, p2 : Package, p3 : Package, min_w : &mut usize, min_q : &mut usize, min_n : &mut usize, dp : &mut HashMap<usize, usize>) {
+fn get_diff(mut packages : Vec<Package>) -> usize {
 
-    let q = get_q(&p1,&p2,&p3);
-    let n = min(min(p1.n, p2.n), p3.n);
+    packages.sort_by(|a,b| b.w.partial_cmp(&a.w).unwrap());
+    let mut needed = 0;
+
+    for i in 1..packages.len() {
+        needed += abs(packages[i].w, packages[0].w);
+    }
+
+    needed
+}
+
+fn good_func_name(
+    weights : &Vec<usize>,
+    sum : usize,
+    pos : usize,
+    mut packages : Vec<Package>,
+    min_w : &mut usize,
+    min_q : &mut usize,
+    min_n : &mut usize,
+    dp : &mut HashMap<u128, usize>)
+{
+
+    packages.sort_by(|a,b| a.n.partial_cmp(&b.n).unwrap());
+    let q = get_q(&packages);
+    let n = packages[0].n;
     if n > *min_n { return;}
 
-    let key = get_key(pos, &p1, &p2, &p3);
+    let key = get_key(pos, &packages);
     if dp.contains_key(&key) && *dp.get(&key).unwrap() <= q { return;}
     dp.insert(key, q);
 
     if pos >= weights.len()
     {
-        if p1.w == p2.w && p2.w == p3.w
+        if all_the_same(&packages)
         {
-            println!("{} {} {} {} {} {}", p1.w ,p2.w, p3.w, p1.q, p2.q, p3.q);
-            println!("{} {} {} {}", *min_w, *min_q, p1.w, q);
             if n <= *min_n
             {
                 *min_n = n;
-                *min_w = p1.w;
+                *min_w = packages[0].w;
                 *min_q = min(*min_q, q);
             }
         }
         return;
     }
+    let needed = get_diff(packages.clone());
+    if sum < needed { return; }
 
-    if sum < abs(p1.w, p2.w) + abs(p1.w, p3.w) { return; }
     let w = weights[pos];
-
-    good_func_name(weights, sum-w, pos + 1, p1.add_weight(w), p2.clone(), p3.clone(), min_w, min_q, min_n, dp);
-    good_func_name(weights, sum-w, pos + 1, p1.clone(), p2.add_weight(w), p3.clone(), min_w, min_q, min_n, dp);
-    good_func_name(weights, sum-w, pos + 1, p1, p2, p3.add_weight(w), min_w, min_q, min_n, dp);
+    for i in 0..packages.len() {
+        let mut p = packages.clone();
+        p[i].add_weight(w);
+        good_func_name(weights, sum-w, pos+1, p, min_w, min_q, min_n, dp);
+    }
 }
 
 fn main() {
 
-    let files = vec!["data"];
+    let files = vec!["test", "data"];
     for file in files {
         let input: String;
         match read_inputs(file.to_string()) {
@@ -135,13 +148,24 @@ fn main() {
         let mut min_w = usize::MAX;
         let mut min_q = usize::MAX;
         let mut min_n = usize::MAX;
-
-        let mut dp = HashMap::new();
-        good_func_name(&weights, sum, 0,
-                       Package {w : 0, q : 1, n : 0},
-                       Package {w : 0, q : 1, n : 0},
-                       Package {w : 0, q : 1, n : 0},
-                       &mut min_w, &mut min_q, &mut min_n, &mut dp);
-        println!("w:{} q:{} n:{}", min_w, min_q, min_n);
+        {
+            let mut dp = HashMap::new();
+            good_func_name(&weights, sum, 0,
+                           vec![Package {w : 0, q : 1, n : 0},
+                                Package {w : 0, q : 1, n : 0},
+                                Package {w : 0, q : 1, n : 0}],
+                           &mut min_w, &mut min_q, &mut min_n, &mut dp);
+            println!("star1: w:{} q:{} n:{}", min_w, min_q, min_n);
+        }
+        {
+            let mut dp = HashMap::new();
+            good_func_name(&weights, sum, 0,
+                           vec![Package {w : 0, q : 1, n : 0},
+                                Package {w : 0, q : 1, n : 0},
+                                Package {w : 0, q : 1, n : 0},
+                                Package {w : 0, q : 1, n : 0}],
+                           &mut min_w, &mut min_q, &mut min_n, &mut dp);
+            println!("star2: w:{} q:{} n:{}", min_w, min_q, min_n);
+        }
     }
 }
