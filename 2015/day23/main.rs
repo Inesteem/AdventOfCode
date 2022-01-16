@@ -15,6 +15,7 @@ enum Operation {
     JMP,
     JIE,
     JIO,
+    INVALID,
 }
 
 #[derive(PartialEq, Clone, Copy, Display, Debug)]
@@ -25,7 +26,7 @@ enum Register {
     INVALID,
 }
 
-type RegCache = [isize;2];
+type RegCache = [usize;2];
 
 fn get_reg(c : &str) -> Register {
     match c {
@@ -43,15 +44,17 @@ fn read_inputs(filename : String) -> std::io::Result<String> {
     contents.pop();
     Ok(contents)
 }
-
-fn alu(instructions: &Vec<Instruction>) -> isize
+const star2 : bool = true;
+fn alu(instructions: &Vec<Instruction>) -> usize
 {
 
     let mut registers : RegCache = [0;2];
-    let mut i = 0;
+    if star2 { registers[0] = 1;}
+    let mut i : isize = 0;
 
-    while i < instructions.len() {
-        i = ins.apply(&mut registers);
+    while i < instructions.len() as isize  && i >= 0 {
+        i += instructions[i as usize].apply(&mut registers);
+        println!("{} : {:?}", i, registers);
     }
 
     registers[Register::B as usize]
@@ -77,22 +80,22 @@ struct Instruction
     val : isize,
 }
 
-const Dummy : Instruction = Instruction{op : Operation::INVALID, dst : Register::INVALID, src : Register::INVALID, val : -1};
+const Dummy : Instruction = Instruction{op : Operation::INVALID, reg : Register::INVALID, val : -1};
 impl Instruction
 {
-    fn new(op : Operation, dst : Register, val : isize) -> Self {
+    fn new(op : Operation, reg : Register, val : isize) -> Self {
         Instruction{op : op, reg : reg,  val : val}
     }
     fn parse(line : &str) -> Self {
         let parts : Vec<&str> = line.split_whitespace().collect();
-
+        let mut val = -1;
+        let op =  get_op(parts[0]);
         //REG?
-        let reg = get_reg(parts[1][0..1]);
-        if src == Register::INVALID {
+        let reg = get_reg(&parts[1][0..1]);
+        if reg == Register::INVALID {
             val =  parts[1].parse().unwrap();
         }
 
-        let mut val = -1;
         if parts.len() > 2 {
             val = parts[2].parse().unwrap();
         }
@@ -105,13 +108,13 @@ impl Instruction
             Operation::HLF => regs[self.reg as usize] / 2,
             Operation::TPL => regs[self.reg as usize] * 3,
             Operation::INC => regs[self.reg as usize] + 1,
-            Operation::JMP => {return val},
-            Operation::JIE => {if regs[self.reg as usize] % 2 == 0 { return val;} return 1;} 
-            Operation::JIO => {if regs[self.reg as usize] == 1 { return val;} return 1;} 
+            Operation::JMP => {return self.val},
+            Operation::JIE => {if regs[self.reg as usize] % 2 == 0 { return self.val;} return 1;} 
+            Operation::JIO => {if regs[self.reg as usize] == 1 { return self.val;} return 1;} 
             _ => {panic!("invalid op");},
         };
 
-        regs[self.dst as usize] = val;
+        regs[self.reg as usize] = val;
         return 1;
     }
 
@@ -133,9 +136,11 @@ fn main() {
 
         let mut instructions: Vec<Instruction>= input.lines().
             map(|line| Instruction::parse(line)).
-            filter(|i| !i.nop()).
             collect();
-        
+       
+        for i in &instructions {
+            println!("{:?}", i);
+        }
         let regB = alu(&instructions);
         println!("{}", regB);
     }
