@@ -19,7 +19,6 @@ const (
 	Draw            = 6
 )
 
-// Rock      Paper Scissors
 var winning = [...]Figure{Error, Scissors, Rock, Paper}
 var loosing = [...]Figure{Error, Paper, Scissors, Rock}
 
