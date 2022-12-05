@@ -40,7 +40,7 @@ func toInt64(s string) int64 {
 }
 
 func main() {
-	file, err := os.Open("input")
+	file, err := os.Open("test")
 	if err != nil {
 		log.Fatal(err)
 	}
