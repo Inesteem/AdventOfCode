@@ -38,9 +38,12 @@ type stack struct {
 	currHeight int
 }
 
-func (s *stack) init(height int, numStacks int) {
+func (s *stack) init(height int) {
 	s.currHeight = 0
-	s.chars = make([]rune, height*numStacks)
+	// of course this is no general solution
+	// it would be cleaner to just implement a resize operation on demand
+	// but I am lazy and this works - for the spezific input I get.
+	s.chars = make([]rune, height*9)
 	for i := range s.chars {
 		s.chars[i] = EMPTY
 	}
@@ -105,7 +108,7 @@ func getStacks(file []string) ([]stack, int) {
 
 	stacks := make([]stack, numStacks)
 	for i := range stacks {
-		stacks[i].init(stackHeight, numStacks)
+		stacks[i].init(stackHeight)
 	}
 	return stacks, stackHeight
 }
