@@ -29,7 +29,14 @@ func doOp(op []string, reg *int) int {
 	return 2
 }
 
+func inSpriteRange(reg, cycle int) bool {
+	nx := cycle % 40
+	return reg >= nx-1 && reg <= nx+1
+}
+
 func main() {
+
+	crt := make([]bool, 6*40)
 
 	cycles := [6]int{20, 60, 100, 140, 180, 220}
 	file, err := os.Open("input")
@@ -46,12 +53,16 @@ func main() {
 	for scanner.Scan() {
 		lineStr := scanner.Text()
 		op := strings.Split(lineStr, " ")
-		if isAdd(op) && j < len(cycles) && i+1 == cycles[j] {
-			s += (1 + i) * reg
-			fmt.Println(i, reg, (1+i)*reg)
-			j += 1
+		if isAdd(op) {
+			crt[i-1] = inSpriteRange(reg, i)
+			if j < len(cycles) && i+1 == cycles[j] {
+				s += (1 + i) * reg
+				fmt.Println(i, reg, (1+i)*reg)
+				j += 1
+			}
 		}
 		i += doOp(op, &reg)
+		crt[i-2] = inSpriteRange(reg, i-1)
 		if j < len(cycles) && i == cycles[j] {
 			s += i * reg
 			fmt.Println(i, reg, i*reg)
@@ -59,4 +70,17 @@ func main() {
 		}
 	}
 	fmt.Println("star1", s)
+
+	fmt.Print("?") //TODO(fix) whats going wrong here?
+	for i := 0; i < 6*40-1; i++ {
+		if (i+1)%40 == 0 {
+			fmt.Println("")
+		}
+		if crt[i] {
+			fmt.Print("#")
+		} else {
+			fmt.Print(".")
+		}
+	}
+	fmt.Println("")
 }
