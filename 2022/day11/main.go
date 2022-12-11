@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"math/big"
 	"os"
 	"regexp"
 	"sort"
@@ -21,13 +20,10 @@ var prevReg = regexp.MustCompile(`If false: throw to monkey ([\d]*)`)
 const (
 	//star1 config
 	//maxRound = 20
+	//divBy = 3
 	maxRound = 1000
+	divBy    = 1
 )
-
-//star1 config
-//var divBy = *big.NewInt(int64(3))
-var divBy = big.NewInt(int64(1))
-var zero = big.NewInt(int64(0))
 
 type Operation int
 
@@ -41,27 +37,27 @@ func assert(cond bool, msg string) {
 		log.Fatal("assertion failed:", msg)
 	}
 }
-func toInt(s string) int {
+func toInt(s string) int64 {
 	i, _ := strconv.ParseInt(s, 10, 64)
-	return int(i)
+	return int64(i)
 }
 
 type operation struct {
 	op       Operation
-	i        *big.Int
+	i        int64
 	withSelf bool
 }
 
-func (o *operation) doOp(val *big.Int) *big.Int {
+func (o *operation) doOp(val int64) int64 {
 	i := o.i
 	if o.withSelf {
 		i = val
 	}
 
 	if o.op == Add {
-		return val.Add(val, i)
+		return i + val
 	}
-	return val.Mul(val, i)
+	return i * val
 
 }
 func getOp(line string) operation {
@@ -70,7 +66,7 @@ func getOp(line string) operation {
 		fmt.Sprintf("wrong length for operation, -want %d +got %d", 3, len(match)))
 
 	op := Mul
-	i := 0
+	i := int64(0)
 
 	if match[1][0] == '+' {
 		op = Add
@@ -80,63 +76,54 @@ func getOp(line string) operation {
 	}
 	return operation{
 		op:       op,
-		i:        big.NewInt(int64(i)),
+		i:        i,
 		withSelf: match[2] == "old",
 	}
 }
 
 type monkey struct {
-	items     []*big.Int
-	next      int
-	prev      int
+	items     []int64
+	next      int64
+	prev      int64
 	op        operation
-	divBy     *big.Int
+	divBy     int64
 	inspected int64
 }
 
-func (m *monkey) inspectItems(monkeys []monkey) {
+func (m *monkey) inspectItems(monkeys []monkey, magic int64) {
 	items := m.items
 	m.inspected += int64(len(items))
-	//fmt.Println(m.inspected, len(items))
 	for _, item := range items {
-		//fmt.Print(item, " -> ")
-		item = m.op.doOp(item)
-		item = item.Div(item, divBy)
-		item_tmp := new(big.Int)
-		item_tmp.Set(item)
-		//fmt.Println(item)
-		if (item_tmp.Mod(item_tmp, m.divBy)).Cmp(zero) == 0 {
-			//fmt.Println(" t ->", m.next)
+		item = m.op.doOp(item) / divBy
+		item %= magic
+		if (item % m.divBy) == 0 {
 			monkeys[m.next].stash(item)
 		} else {
-			//fmt.Println(" f ->", m.prev)
 			monkeys[m.prev].stash(item)
 		}
 	}
 }
-func (m *monkey) clearStash() {
-	m.items = make([]*big.Int, 0)
-}
 
-func (m *monkey) stash(item *big.Int) {
-	//fmt.Println("stash : ", item)
+func (m *monkey) clearStash() {
+	m.items = make([]int64, 0)
+}
+func (m *monkey) stash(item int64) {
 	m.items = append(m.items, item)
 }
-
 func (m *monkey) parseString(lines []string) {
-	m.items = make([]*big.Int, 0)
+	m.items = make([]int64, 0)
 
 	match := itemReg.FindStringSubmatch(lines[0])
 	assert(len(match) > 1, "no items found")
 	items := strings.Split(match[1], ",")
 	for i := range items {
-		m.stash(big.NewInt(int64(toInt(strings.TrimSpace(items[i])))))
+		m.stash(toInt(strings.TrimSpace(items[i])))
 	}
 	m.op = getOp(lines[1])
 
 	match = testReg.FindStringSubmatch(lines[2])
 	assert(len(match) == 2, "no test immediate found")
-	m.divBy = big.NewInt(int64(toInt(match[1])))
+	m.divBy = toInt(match[1])
 
 	match = nextReg.FindStringSubmatch(lines[3])
 	assert(len(match) == 2, fmt.Sprintf("invalid next; -want %d +got %d", 1, len(match)))
@@ -169,17 +156,17 @@ func main() {
 		log.Fatal(err)
 	}
 	var monkeys []monkey = make([]monkey, 0)
+	var magic int64 = 1
 	for i := 1; i < len(lines); i += 7 {
 		m := monkey{}
-		fmt.Println(lines[i-1])
 		m.parseString(lines[i:])
 		monkeys = append(monkeys, m)
+		magic *= m.divBy
 	}
 
 	for round := 0; round < maxRound; round++ {
 		for i := range monkeys {
-			fmt.Println(fmt.Sprintf("\n%d: Monkey %d:", round, i))
-			monkeys[i].inspectItems(monkeys)
+			monkeys[i].inspectItems(monkeys, magic)
 			monkeys[i].clearStash()
 		}
 	}
@@ -196,5 +183,5 @@ func main() {
 	}
 	sort.Slice(inspected, func(i, j int) bool { return inspected[i] < inspected[j] })
 
-	fmt.Println("star : ", inspected, inspected[len(inspected)-1]*inspected[len(inspected)-2])
+	fmt.Println("star1 : ", inspected, inspected[len(inspected)-1]*inspected[len(inspected)-2])
 }
