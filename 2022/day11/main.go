@@ -21,7 +21,7 @@ const (
 	//star1 config
 	//maxRound = 20
 	//divBy = 3
-	maxRound = 1000
+	maxRound = 10000
 	divBy    = 1
 )
 
@@ -151,7 +151,7 @@ func readLines(path string) ([]string, error) {
 
 func main() {
 
-	lines, err := readLines("test")
+	lines, err := readLines("input")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -173,15 +173,9 @@ func main() {
 	inspected := make([]int64, len(monkeys))
 
 	for i, m := range monkeys {
-		fmt.Println(fmt.Sprintf("\nMonkey %d:", i))
-		fmt.Println(len(m.items), ":")
-		for _, item := range m.items {
-			fmt.Print(item, " ")
-		}
-		fmt.Println("   [", m.inspected, "]")
 		inspected[i] = m.inspected
 	}
 	sort.Slice(inspected, func(i, j int) bool { return inspected[i] < inspected[j] })
 
-	fmt.Println("star1 : ", inspected, inspected[len(inspected)-1]*inspected[len(inspected)-2])
+	fmt.Println("star : ", inspected[len(inspected)-1]*inspected[len(inspected)-2])
 }
