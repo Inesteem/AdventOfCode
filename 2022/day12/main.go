@@ -7,6 +7,9 @@ import (
 	"os"
 )
 
+//TODO: simplify, implemented bastard dikstra priority queue because I was not
+// sure what second assignment would bring - but with current solution I just need
+// a FIFO
 const star int = 1
 
 type coord struct {
