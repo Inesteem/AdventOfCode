@@ -88,8 +88,8 @@ type world struct {
 }
 
 func (w *world) print() {
-	for r := w.minVals.row; r <= w.maxVals.row; r++ {
-		for c := w.minVals.col; c <= w.maxVals.col; c++ {
+	for r := w.minVals.row; r <= w.maxVals.row+2; r++ {
+		for c := w.minVals.col - 1; c <= w.maxVals.col+1; c++ {
 			if w.origin.col == c && w.origin.row == r {
 				fmt.Print("+")
 				continue
@@ -132,6 +132,7 @@ func (w *world) addLine(line string) {
 		for row := minVal(last.row, curr.row); row <= maxVal(last.row, curr.row); row++ {
 			c := coord{row: row, col: curr.col}
 			w.blocked[c] = wall
+			w.colFloor[c.col] = append(w.colFloor[c.col], c.row)
 		}
 		for col := minVal(last.col, curr.col); col <= maxVal(last.col, curr.col); col++ {
 			c := coord{row: curr.row, col: col}
@@ -148,11 +149,11 @@ func (w *world) at(coord coord) stuff {
 	}
 	return space
 }
-func (w *world) arrange(k int) {
+func (w *world) arrange(col int) {
 
-	sort.Slice(w.colFloor[k],
+	sort.Slice(w.colFloor[col],
 		func(i, j int) bool {
-			return w.colFloor[k][i] < w.colFloor[k][j]
+			return w.colFloor[col][i] < w.colFloor[col][j]
 		})
 }
 func (w *world) prepare() {
@@ -163,10 +164,18 @@ func (w *world) prepare() {
 
 func (w *world) freeAt(coord coord) bool {
 	stuff := w.at(coord)
-	return stuff != wall && stuff != sand
+	return stuff != wall && stuff != sand && (coord.row < w.maxVals.row+2)
 }
 
-func (w *world) fallSand(pos coord) bool {
+func (w *world) setSand(pos coord) {
+	w.numSand += 1
+	w.blocked[pos] = sand
+
+	w.colFloor[pos.col] = append(w.colFloor[pos.col], pos.row)
+	w.arrange(pos.col)
+}
+
+func (w *world) fallSand(pos coord, star int) bool {
 	w.blocked[pos] = route
 	//binary search?
 	row := pos.row
@@ -179,25 +188,32 @@ func (w *world) fallSand(pos coord) bool {
 	}
 
 	if row == pos.row {
-		return false
+		if star == 1 {
+			return false
+		}
+		row = w.maxVals.row + 2
 	}
 
-	//pos.row = row - 1
+	pos.row = row - 1
 
 	for _, d := range dirs {
 		d.goIn(pos)
 		if !w.freeAt(d) {
 			continue
 		}
-		return w.fallSand(d)
+		return w.fallSand(d, star)
 	}
-	w.numSand += 1
-	w.blocked[pos] = sand
+
+	w.setSand(pos)
+	if pos == w.origin {
+		return false
+	}
+
 	return true
 }
 
-func (w *world) addSand() bool {
-	return w.fallSand(w.origin)
+func (w *world) addSand(star int) bool {
+	return w.fallSand(w.origin, star)
 }
 
 func main() {
@@ -214,7 +230,8 @@ func main() {
 	world.prepare()
 	world.print()
 	fmt.Println()
-	for world.addSand() {
+	for world.addSand(2) {
+		//world.print()
 		//input()
 	}
 	world.print()
