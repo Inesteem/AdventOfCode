@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -77,10 +76,9 @@ func newCoord(c string) coord {
 	return coord{col: toInt(pos[0]) - 500, row: toInt(pos[1])}
 }
 
-type floorList []int
 type world struct {
 	blocked  map[coord]stuff
-	colFloor map[int]floorList
+	colFloor map[int]int
 	origin   coord
 	minVals  coord
 	maxVals  coord
@@ -111,7 +109,7 @@ func (w *world) print() {
 func newWorld() world {
 	return world{
 		blocked:  make(map[coord]stuff),
-		colFloor: make(map[int]floorList),
+		colFloor: make(map[int]int),
 		origin:   coord{0, 0},
 		minVals:  coord{0, 0},
 		maxVals:  coord{0, 0},
@@ -132,12 +130,12 @@ func (w *world) addLine(line string) {
 		for row := minVal(last.row, curr.row); row <= maxVal(last.row, curr.row); row++ {
 			c := coord{row: row, col: curr.col}
 			w.blocked[c] = wall
-			w.colFloor[c.col] = append(w.colFloor[c.col], c.row)
+			w.colFloor[c.col] = maxVal(w.colFloor[c.col], c.row)
 		}
 		for col := minVal(last.col, curr.col); col <= maxVal(last.col, curr.col); col++ {
 			c := coord{row: curr.row, col: col}
 			w.blocked[c] = wall
-			w.colFloor[c.col] = append(w.colFloor[c.col], c.row)
+			w.colFloor[c.col] = maxVal(w.colFloor[c.col], c.row)
 		}
 		last = curr
 	}
@@ -149,18 +147,6 @@ func (w *world) at(coord coord) stuff {
 	}
 	return space
 }
-func (w *world) arrange(col int) {
-
-	sort.Slice(w.colFloor[col],
-		func(i, j int) bool {
-			return w.colFloor[col][i] < w.colFloor[col][j]
-		})
-}
-func (w *world) prepare() {
-	for k := range w.colFloor {
-		w.arrange(k)
-	}
-}
 
 func (w *world) freeAt(coord coord) bool {
 	stuff := w.at(coord)
@@ -170,31 +156,14 @@ func (w *world) freeAt(coord coord) bool {
 func (w *world) setSand(pos coord) {
 	w.numSand += 1
 	w.blocked[pos] = sand
-
-	w.colFloor[pos.col] = append(w.colFloor[pos.col], pos.row)
-	w.arrange(pos.col)
 }
 
 func (w *world) fallSand(pos coord, star int) bool {
 	w.blocked[pos] = route
-	//binary search?
-	row := pos.row
 
-	for _, r := range w.colFloor[pos.col] {
-		if r > pos.row {
-			row = r
-			break
-		}
+	if pos.row > w.colFloor[pos.col] && star == 1 {
+		return false
 	}
-
-	if row == pos.row {
-		if star == 1 {
-			return false
-		}
-		row = w.maxVals.row + 2
-	}
-
-	pos.row = row - 1
 
 	for _, d := range dirs {
 		d.goIn(pos)
@@ -227,7 +196,6 @@ func main() {
 		lineStr := scanner.Text()
 		world.addLine(lineStr)
 	}
-	world.prepare()
 	world.print()
 	fmt.Println()
 	for world.addSand(2) {
@@ -235,6 +203,6 @@ func main() {
 		//input()
 	}
 	world.print()
-	fmt.Println("star1", world.numSand)
+	fmt.Println("star2", world.numSand)
 
 }
