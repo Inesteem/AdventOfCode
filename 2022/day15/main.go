@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 )
 
@@ -36,6 +37,10 @@ func toInt64(s string) int64 {
 
 type coord struct {
 	x, y int64
+}
+
+func (c *coord) tuningFrequency() int64 {
+	return c.x*int64(4000000) + c.y
 }
 
 func (c *coord) add(o *coord) coord {
@@ -125,16 +130,13 @@ func (f *field) addSensor(s sensor) {
 	fmt.Println(s, "    ", f.minVals, f.maxVals)
 }
 
-func (f *field) unbeaconedArea(c *coord) bool {
-	if f.isBeacon(c) {
-		return false
-	}
+func (f *field) unbeaconedArea(c *coord) (bool, *sensor) {
 	for si := range f.sensors {
 		if c.manhattenDistance(&f.sensors[si].position) <= f.sensors[si].dist {
-			return true
+			return true, &f.sensors[si]
 		}
 	}
-	return false
+	return false, nil
 }
 
 func (f *field) isBeacon(c *coord) bool {
@@ -167,7 +169,7 @@ func (f *field) print() {
 				fmt.Print("S")
 			} else if f.isBeacon(&c) {
 				fmt.Print("B")
-			} else if f.unbeaconedArea(&c) {
+			} else if u, _ := f.unbeaconedArea(&c); u {
 				fmt.Print(".")
 			} else {
 				fmt.Print("#")
@@ -180,6 +182,8 @@ func (f *field) print() {
 
 func main() {
 	field := field{sensors: make([]sensor, 0)}
+	//row := int64(10)
+	//file, _ := os.Open("test")
 	row := int64(2000000)
 	file, _ := os.Open("input")
 	defer file.Close()
@@ -189,15 +193,40 @@ func main() {
 		lineStr := scanner.Text()
 		field.addSensor(parseSensorData(lineStr))
 	}
-	//field.print()
-	unbeaconed := 0
+	star1 := 0
 	c := coord{x: field.minVals.x, y: row}
 	for c.x <= field.maxVals.x {
-		if field.unbeaconedArea(&c) {
-			unbeaconed++
+		u, _ := field.unbeaconedArea(&c)
+		if u && !field.isBeacon(&c) {
+			star1++
 		}
 		c.x++
 	}
-	fmt.Println("\nstar1 : ", unbeaconed)
+	sort.Slice(field.sensors, func(i, j int) bool { return field.sensors[i].position.x < field.sensors[j].position.x })
+
+	fmt.Println("\nstar1 : ", star1)
+
+	// search distress beacong
+	maxVals := coord{0, 0}
+	for i := range field.sensors {
+		maxVals.setMaxVals(field.sensors[i].position)
+	}
+out:
+	for y := maxVal(0, field.minVals.y); y <= minVal(4000000, maxVals.y); y++ {
+		for x := maxVal(0, field.minVals.x); x <= minVal(4000000, maxVals.x); x++ {
+			c := coord{x: x, y: y}
+			u, s := field.unbeaconedArea(&c)
+			if u {
+				if s.position.x > x {
+					x = s.position.x + (s.dist - abs(s.position.y-y))
+				} else {
+					x += (s.dist - abs(s.position.y-y) - (x - s.position.x))
+				}
+			} else {
+				fmt.Println("\nstar2 : ", c.tuningFrequency())
+				break out
+			}
+		}
+	}
 
 }
