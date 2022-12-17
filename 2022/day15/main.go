@@ -99,7 +99,7 @@ func parseSensorData(line string) sensor {
 
 	match := sensorRegExp.FindStringSubmatch(line)
 	if got, want := len(match), 5; got != want {
-		log.Fatal("%s does not fit format; -want(%d) +got(%d)", want, got)
+		log.Fatalf("%s does not fit format; -want(%d) +got(%d)", line, want, got)
 	}
 
 	position := coord{x: toInt64(match[1]), y: toInt64(match[2])}
@@ -206,7 +206,7 @@ func main() {
 
 	fmt.Println("\nstar1 : ", star1)
 
-	// search distress beacong
+	// search distress beacon
 	maxVals := coord{0, 0}
 	for i := range field.sensors {
 		maxVals.setMaxVals(field.sensors[i].position)
@@ -216,7 +216,7 @@ out:
 		for x := maxVal(0, field.minVals.x); x <= minVal(4000000, maxVals.x); x++ {
 			c := coord{x: x, y: y}
 			u, s := field.unbeaconedArea(&c)
-			if u {
+			if u { //check those edge cases again, not 100% sure this fits
 				if s.position.x > x {
 					x = s.position.x + (s.dist - abs(s.position.y-y))
 				} else {
