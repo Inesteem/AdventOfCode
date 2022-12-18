@@ -208,7 +208,6 @@ func main() {
 				key, ok := alreadySeen.foundRepetition(field.getProfileforRow(currPos.row), currJet, currForm)
 				if ok {
 					val := alreadySeen.getVal(key)
-					fmt.Println("repeated at", key, val)
 					stonesLeft := (maxNum - numStones)
 					stonesSinceLast := numStones - val.numStones
 					heightSinceLast := field.heighest - val.heightest
