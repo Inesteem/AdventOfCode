@@ -60,6 +60,7 @@ func (c *cache) contacts(startPos coord3D) bool {
 	}
 	return false
 }
+
 func (c *cache) steamExpand(blocks *cache, startPos coord3D, dirs []coord3D) {
 	for d := range dirs {
 		pos := startPos
