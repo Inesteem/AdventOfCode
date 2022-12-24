@@ -1,4 +1,3 @@
-//copied from https://golangbyexample.com/doubly-linked-list-golang/
 package main
 
 import (
@@ -6,80 +5,71 @@ import (
 	"log"
 )
 
+// Disclaimer: most funcs assume valid ringbuf; no error checking
+
 type node struct {
-	data int
+	data int64
 	prev *node
 	next *node
 }
 
-func (n *node) getNodeAfter(num int) *node {
+func (n *node) print(num int) {
+	if num == 0 {
+		fmt.Println()
+		return
+	}
+	fmt.Print(n.data, " ")
+	n.next.print(num - 1)
+}
+
+func (n *node) getNodeAfter(num int64) *node {
 	if num == 0 {
 		return n
 	}
 	return n.next.getNodeAfter(num - 1)
 }
 
-func (n *node) moveRight(num int) {
+func (n *node) insertAfter(node *node) {
+	next := n.next
+
+	node.prev = n
+	node.next = next
+	next.prev = node
+	n.next = node
+
+}
+
+func (n *node) unlink() {
+	n.prev.next = n.next
+	n.next.prev = n.prev
+}
+
+func (n *node) moveRight(num int64) {
 	if num == 0 {
 		return
 	}
-	prev := n.prev
 	next := n.next
-	if next == nil {
-		log.Fatal("next node is nil")
-	}
-	//update node
-	n.next = next.next
-	n.prev = next
+	n.unlink()
 
-	//update next.next
-	if next.next != nil {
-		next.next.prev = n
-	}
-	//update next
-	next.prev = prev
-	next.next = n
-
-	//update prev
-	if prev != nil {
-		prev.next = next
-	}
+	next.insertAfter(n)
 	n.moveRight(num - 1)
 }
-func (n *node) moveLeft(num int) {
+
+func (n *node) moveLeft(num int64) {
 	if num == 0 {
 		return
 	}
 
 	prev := n.prev
-	next := n.next
-	if prev == nil {
-		log.Fatal("prev node is nil")
-	}
+	n.unlink()
 
-	//update node
-	n.prev = prev.prev
-	n.next = prev
-
-	//update prev.prev
-	if prev.prev != nil {
-		prev.prev.next = n
-	}
-
-	//update prev
-	prev.next = next
-	prev.prev = n
-
-	//update next
-	if next != nil {
-		next.prev = prev
-	}
-
+	prev.prev.insertAfter(n)
 	n.moveLeft(num - 1)
+
 }
 
 type doublyLinkedList struct {
-	len  int
+	len  int64
 	tail *node
 	head *node
 }
@@ -88,7 +78,7 @@ func initDoublyList() *doublyLinkedList {
 	return &doublyLinkedList{}
 }
 
-func (d *doublyLinkedList) Append(data int) *node {
+func (d *doublyLinkedList) Append(data int64) *node {
 	newNode := &node{
 		data: data,
 	}
@@ -108,7 +98,7 @@ func (d *doublyLinkedList) TraverseForward() error {
 		return fmt.Errorf("TraverseError: List is empty")
 	}
 	temp := d.head
-	for i := 0; i < d.Size(); i++ {
+	for i := int64(0); i < d.Size(); i++ {
 		fmt.Printf("value = %v, this = %p, prev = %p, next = %p\n", temp.data, temp, temp.prev, temp.next)
 		temp = temp.next
 	}
@@ -127,6 +117,6 @@ func (d *doublyLinkedList) toRingBuf() {
 	d.head.prev = d.tail
 }
 
-func (d *doublyLinkedList) Size() int {
+func (d *doublyLinkedList) Size() int64 {
 	return d.len
 }
