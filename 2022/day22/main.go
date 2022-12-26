@@ -44,6 +44,13 @@ func main() {
 	for row := range lines[0 : len(lines)-2] {
 		field.parseLine(row, lines[row])
 	}
+
+	cubeWidth := getCubeWidth(&field)
+	cubeHeight := getCubeHeight(&field)
+	fmt.Println(getCubePattern(&field, cubeWidth, cubeHeight))
+	return
+	//star1
+
 	pos := field.findLeftTopFreeTile()
 	dir := GO_RIGHT
 	cmd := lines[len(lines)-1]
