@@ -36,14 +36,15 @@ fn main() {
 
 
 
-        let lines : Vec<&str> = input.lines().collect();
-        let mut ids :i32 = 0;
+        let lines: Vec<&str> = input.lines().collect();
+        let mut ids: i32 = 0;
+        let mut power: i32 = 0;
         for line in lines {
 
             let mut cube_map: HashMap<&str, i32> = [
-                ("red", 12),
-                ("green", 13),
-                ("blue", 14),
+                ("red", 0),
+                ("green", 0),
+                ("blue", 0),
             ].iter().cloned().collect();
 
             let game: Vec<&str>= line.split(":").collect();
@@ -58,13 +59,15 @@ fn main() {
 
                 }
             }
-            if cube_map["red"] > 12|| cube_map["green"] > 13 || cube_map["blue"] > 14 {
+            power += cube_map["red"] * cube_map["green"] * cube_map["blue"];
+            if cube_map["red"] > 12 || cube_map["green"] > 13 || cube_map["blue"] > 14 {
                 continue;
             }
             ids +=  get_num(game[0], &re);
             
         }
         //231 too low
-        println!("{}", ids);
+        println!("star1: {}", ids);
+        println!("star2: {}", power);
     }
 }
