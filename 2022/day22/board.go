@@ -160,3 +160,23 @@ func (f *Field) findLeftTopFreeTile() coord {
 	return coord{}
 
 }
+
+func (f *Field) goInStar2(pos coord, dir *coord, num int, pattern *cubePattern) coord {
+	lastFree := pos
+	f.path[pos.row][pos.col] = get_dir(dir)
+	for ; num > 0; num -= 1 {
+		currFace := pattern.getFace(pos)
+		pos = pos.add(dir)
+		if f.voidAt(&pos.row, &pos.col) {
+			fmt.Println(currFace, "->", pattern.getNextFace(currFace, *dir))
+			continue
+		}
+		//	if f.freeAt(&pos.row, &pos.col) {
+		lastFree = pos
+		f.path[pos.row][pos.col] = get_dir(dir)
+		continue
+		//	}
+		break
+	}
+	return lastFree
+}

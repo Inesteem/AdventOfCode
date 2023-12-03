@@ -29,7 +29,7 @@ func star1(pos coord, dir coord) int {
 }
 
 func main() {
-	lines, _ := readLines("input")
+	lines, _ := readLines("test")
 
 	maxRow := 0
 	for i := range lines[0 : len(lines)-2] {
@@ -47,27 +47,32 @@ func main() {
 
 	cubeWidth := getCubeWidth(&field)
 	cubeHeight := getCubeHeight(&field)
-	fmt.Println(getCubePattern(&field, cubeWidth, cubeHeight))
+	cubePattern := getCubePattern(&field, cubeWidth, cubeHeight)
+	cubePattern.print()
+	dir := GO_UP
+	pos := coord{row: 4, col: 0}
+	pos = field.goInStar2(pos, &dir, 1, &cubePattern)
 	return
-	//star1
-
-	pos := field.findLeftTopFreeTile()
-	dir := GO_RIGHT
-	cmd := lines[len(lines)-1]
-	num := 0
-
-	for r := 0; r < len(cmd); r += 1 {
-		r, num = parseInt(cmd, r)
-		pos = field.goIn(pos, &dir, num)
-		if r < len(cmd) {
-			if cmd[r] == 'R' {
-				dir = dir.turnRight()
-			} else {
-				dir = dir.turnLeft()
-			}
-		}
-	}
-	fmt.Println(pos)
-
-	fmt.Println("star1", star1(pos, dir))
+	//	//star1
+	//
+	//	pos := field.findLeftTopFreeTile()
+	//	dir := GO_RIGHT
+	//	cmd := lines[len(lines)-1]
+	//	num := 0
+	//
+	//	for r := 0; r < len(cmd); r += 1 {
+	//		r, num = parseInt(cmd, r)
+	//		pos = field.goIn(pos, &dir, num)
+	//		if r < len(cmd) {
+	//			if cmd[r] == 'R' {
+	//				dir = dir.turnRight()
+	//			} else {
+	//				dir = dir.turnLeft()
+	//			}
+	//		}
+	//	}
+	//	fmt.Println(pos)
+	//
+	//	fmt.Println("star1", star1(pos, dir))
+	fmt.Println()
 }
