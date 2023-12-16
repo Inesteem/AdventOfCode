@@ -5,6 +5,10 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::process;
 
+// Note: incomplete. My laptop crashed and I lost the rust code. Frustrated I started over in
+// python, this is some weird state I saved in git for random reasons. "Almost" correct, but still
+// broken somehow.
+
 struct Mapping {
     src_start: i64,
     dst_start: i64,
@@ -12,26 +16,43 @@ struct Mapping {
 }
 
 impl Mapping {
-    fn new(s :i64, d:i64, l:i64)->Mapping {
-        Mapping{
-            src_start : s,
+    fn new(s: i64, d: i64, l: i64) -> Mapping {
+        Mapping {
+            src_start: s,
             dst_start: d,
             range_len: l,
         }
     }
+
+    fn maps(&self, s: i64) -> bool {
+        return s >= self.src_start && s < (self.src_start + self.range_len);
+    }
+
+    fn map(&self, s: i64) -> i64 {
+        return self.dst_start + (s - self.src_start);
+    }
 }
 
 struct Mappings {
-    mappings : Vec<Mapping>,
+    mappings: Vec<Mapping>,
 }
 
 impl Mappings {
     fn new() -> Mappings {
-        Mappings {mappings : vec![]},
+        Mappings { mappings: vec![] }
     }
 
-    fn add(&self, s:i64, d:i64, l:i64){
-        self.mappings.push(Mapping::new(s, d, l);
+    fn add(&mut self, s: i64, d: i64, l: i64) {
+        self.mappings.push(Mapping::new(s, d, l));
+    }
+
+    fn entry(&self, s: i64) -> i64 {
+        for m in &self.mappings {
+            if m.maps(s) {
+                return m.map(s);
+            }
+        }
+        return s;
     }
 }
 
@@ -55,7 +76,7 @@ fn get_vec(line: &str) -> Vec<i64> {
         .map(|x| get_num(x))
         .collect();
 }
-fn fill_map(lines: &Vec<&str>, i: &mut usize, map: &mut HashMap<i64, i64>) {
+fn fill_map(lines: &Vec<&str>, i: &mut usize, map: &mut Mappings) {
     while *i < lines.len() && !lines[*i].is_empty() {
         let line = &lines[*i];
         let nums: Vec<i64> = get_vec(line);
@@ -63,19 +84,17 @@ fn fill_map(lines: &Vec<&str>, i: &mut usize, map: &mut HashMap<i64, i64>) {
         let dest_range_start = nums[0];
         let source_range_start = nums[1];
         let range_len = nums[2];
-        for l in 0..range_len {
-            map.insert(source_range_start + l, dest_range_start + l);
-        }
+        map.add(source_range_start, dest_range_start, range_len);
         *i += 1;
         println!("{}: {:?}", *i, nums);
     }
 }
-fn get_dest(src: i64, map: &mut HashMap<i64, i64>) -> &mut i64 {
-    return map.entry(src).or_insert(src);
+fn get_dest(src: i64, map: &Mappings) -> i64 {
+    return map.entry(src);
 }
 
 fn main() {
-    let files = vec!["test", "input"];
+    let files = vec!["test"]; //, "input"];
     for file in files {
         let input: String;
         match read_inputs(file.to_string()) {
@@ -85,14 +104,14 @@ fn main() {
 
         let lines: Vec<&str> = input.lines().collect();
         let mut seeds: Vec<i64> = vec![];
-        let mut seed_to_soil: HashMap<i64, i64> = HashMap::new();
-        let mut soil_to_fertilizer: HashMap<i64, i64> = HashMap::new();
-        let mut fertilizer_to_water: HashMap<i64, i64> = HashMap::new();
-        let mut water_to_light: HashMap<i64, i64> = HashMap::new();
-        let mut light_to_temperature: HashMap<i64, i64> = HashMap::new();
-        let mut temperature_to_humidity: HashMap<i64, i64> = HashMap::new();
-        let mut temperature_to_humidity: HashMap<i64, i64> = HashMap::new();
-        let mut humidity_to_location: HashMap<i64, i64> = HashMap::new();
+        let mut seed_to_soil: Mappings = Mappings::new();
+        let mut soil_to_fertilizer: Mappings = Mappings::new();
+        let mut fertilizer_to_water: Mappings = Mappings::new();
+        let mut water_to_light: Mappings = Mappings::new();
+        let mut light_to_temperature: Mappings = Mappings::new();
+        let mut temperature_to_humidity: Mappings = Mappings::new();
+        let mut temperature_to_humidity: Mappings = Mappings::new();
+        let mut humidity_to_location: Mappings = Mappings::new();
 
         let mut i = 0;
         while i < lines.len() {
@@ -128,15 +147,15 @@ fn main() {
         }
         let mut location = std::i64::MAX;
         for seed in seeds {
-            let mut val = get_dest(seed, &mut seed_to_soil);
-            val = get_dest(*val, &mut soil_to_fertilizer);
-            val = get_dest(*val, &mut fertilizer_to_water);
-            val = get_dest(*val, &mut water_to_light);
-            val = get_dest(*val, &mut light_to_temperature);
-            val = get_dest(*val, &mut temperature_to_humidity);
-            val = get_dest(*val, &mut humidity_to_location);
+            let mut val = get_dest(seed, &seed_to_soil);
+            val = get_dest(val, &soil_to_fertilizer);
+            val = get_dest(val, &fertilizer_to_water);
+            val = get_dest(val, &water_to_light);
+            val = get_dest(val, &light_to_temperature);
+            val = get_dest(val, &temperature_to_humidity);
+            val = get_dest(val, &humidity_to_location);
             println!("seed {} -> {}", seed, val);
-            location = min(location, *val);
+            location = min(location, val);
         }
         println!("star1: {}", location);
     }
