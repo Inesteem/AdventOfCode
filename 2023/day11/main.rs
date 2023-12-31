@@ -25,7 +25,9 @@ impl Galaxy {
     }
 }
 fn main() {
-    let files = vec!["input"];
+    // For star1, replace with 2
+    let mul = 1000000;
+    let files = vec!["test", "input"];
     for file in files {
         let input: String;
         match read_inputs(file.to_string()) {
@@ -47,28 +49,29 @@ fn main() {
                 }
             }
         }
+
         let mut offset = 0;
         let mut last = -1;
         for g in &mut galaxies {
             if g.y == last {
-                g.y += offset;
+                g.y += offset * (mul - 1);
                 continue;
             }
             offset += g.y - (last + 1);
             last = g.y;
-            g.y += offset;
+            g.y += offset * (mul - 1);
         }
         galaxies.sort_by_key(|g| g.x);
         offset = 0;
         last = -1;
         for g in &mut galaxies {
             if g.x == last {
-                g.x += offset;
+                g.x += offset * (mul - 1);
                 continue;
             }
             offset += g.x - (last + 1);
             last = g.x;
-            g.x += offset;
+            g.x += offset * (mul - 1);
         }
 
         galaxies.sort_by_key(|g| g.i);
@@ -86,6 +89,6 @@ fn main() {
                 sum += num::abs(g1.x - g2.x) + num::abs(g1.y - g2.y);
             }
         }
-        println!("star1: {}", sum);
+        println!("star2: {}", sum);
     }
 }
