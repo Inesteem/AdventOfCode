@@ -7,3 +7,8 @@
 !*.cc
 !*.h
 
+
+
+# Added by cargo
+
+/target
