@@ -4,23 +4,37 @@ from typing import Optional
 ROCK = '#'
 ASH = '.'
 
+def bit_count(n):
+   count = 0
+   while n:
+      count += n & 1
+      n >>= 1
+   return count
+ 
+def have_smug_distance(x, y):
+   return bit_count(x ^ y) == 1
 
-
-def check_sym(nums : list[int], idx : int):
+def check_sym(nums : list[int], idx : int, smugs:int = 0):
   offs = 0
-  while idx - offs -1 >= 0 and idx + offs < len(nums):
-    if nums[idx - offs - 1] != nums[idx + offs]:
-      return 0
+  while idx - offs - 1 >= 0 and idx + offs < len(nums):
+    n1=nums[idx - offs - 1]
+    n2=nums[idx + offs]
+    if n1 != n2:
+      if smugs > 0 and have_smug_distance(n1, n2):
+        smugs -= 1
+      else:
+        return 0
     offs += 1
 
   return offs
 
-def check_sym_nums(nums : list[int])->int:
+def check_sym_nums(nums : list[int], skip :int, smugs:int = 0)->int:
   for r in range(1,len(nums)):
-    if nums[r-1] == nums[r]:
-      s = check_sym(nums, r)
+    if r != skip:
+      s = check_sym(nums, r, smugs)
       if s:
         return r
+
   return 0
 
 class Ground:
@@ -28,6 +42,8 @@ class Ground:
     self.board = []
     self.rows = []
     self.cols = []
+    self.col_sym = -1
+    self.row_sym = -1
 
   def add_line(self, line : str):
     self.board += [line]
@@ -42,11 +58,13 @@ class Ground:
         self.cols[i] += 1
     self.rows.append(num)
 
-  def check_sym_rows(self):
-    return check_sym_nums(self.rows)
+  def check_sym_rows(self, smugs:int = 0):
+    self.row_sym = check_sym_nums(self.rows, self.row_sym, smugs)
+    return self.row_sym
 
-  def check_sym_cols(self):
-    return check_sym_nums(self.cols)
+  def check_sym_cols(self, smugs:int = 0):
+    self.col_sym = check_sym_nums(self.cols, self.col_sym, smugs)
+    return self.col_sym
 
   def __repr__(self):
     s ="\n".join(self.board)
@@ -80,12 +98,14 @@ def readGround() -> Optional[Ground]:
 def main():
   grounds = readGround()
   star1 = 0
+  star2 = 0
   while ground := next(grounds):
     print(ground)
-    print(ground.check_sym_cols() , ground.check_sym_rows())
     star1 += ground.check_sym_cols() + 100 * ground.check_sym_rows()
+    star2 += ground.check_sym_cols(1) + 100 * ground.check_sym_rows(1)
 
-  print(star1)
+  print("star1:",star1)
+  print("star2:",star2)
 
 if __name__ == '__main__':
   main()
